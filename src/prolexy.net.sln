@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prolexy.Compiler", "Prolexy.Compiler\Prolexy.Compiler.csproj", "{0F6A85FC-F561-4F3C-BD5D-5A106AD57F28}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prolexy.Compiler.Tests", "Prolexy.Compiler.Tests\Prolexy.Compiler.Tests.csproj", "{5D502141-97B4-4BEF-9D7F-EC5655F95684}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0F6A85FC-F561-4F3C-BD5D-5A106AD57F28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F6A85FC-F561-4F3C-BD5D-5A106AD57F28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F6A85FC-F561-4F3C-BD5D-5A106AD57F28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F6A85FC-F561-4F3C-BD5D-5A106AD57F28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D502141-97B4-4BEF-9D7F-EC5655F95684}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D502141-97B4-4BEF-9D7F-EC5655F95684}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D502141-97B4-4BEF-9D7F-EC5655F95684}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D502141-97B4-4BEF-9D7F-EC5655F95684}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
