@@ -1,4 +1,3 @@
-using Newtonsoft.Json.Linq;
 using TestStack.BDDfy;
 
 namespace Prolexy.Compiler.Tests.Evaluator;
@@ -6,7 +5,7 @@ namespace Prolexy.Compiler.Tests.Evaluator;
 [Story(Title = "Evaluate script", AsA = "Rule manager",
     IWant = "to evaluate statement.",
     SoThat = "I can  execute dynamic rules.")]
-public class EvaluatorExpressionUnitTest
+public class ClrEvaluatorExpressionUnitTest
 {
     [Fact]
     public void Should_can_evaluate_literal()
@@ -23,7 +22,7 @@ public class EvaluatorExpressionUnitTest
                 { "${Value:Text:string}", "{}", "Value" },
                 { "${25:Text:number}", "{}", 25 },
             })
-            .BDDfy<EvaluatorExpressionUnitTest>();
+            .BDDfy<JsonEvaluatorExpressionUnitTest>();
     }
 
     [Fact]
@@ -39,7 +38,7 @@ public class EvaluatorExpressionUnitTest
                 { "birthDay", "{birthDay: '2020-10-12T00:00:00z'}", new DateTime(2020, 10, 12) },
                 { "brother.birthDay", "{brother: {birthDay: '2020-10-12T00:00:00z'}}", new DateTime(2020, 10, 12) },
             })
-            .BDDfy<EvaluatorExpressionUnitTest>();
+            .BDDfy<JsonEvaluatorExpressionUnitTest>();
     }
 
     [Fact]
@@ -99,7 +98,7 @@ public class EvaluatorExpressionUnitTest
                 { "accepted is true", "{accepted: true}", true },
                 { "accepted is not true", "{accepted: true}", false },
             })
-            .BDDfy<EvaluatorExpressionUnitTest>();
+            .BDDfy<JsonEvaluatorExpressionUnitTest>();
     }
 
     [Fact]
@@ -115,7 +114,7 @@ public class EvaluatorExpressionUnitTest
                 { "set age with age + 0.1 * age", "{age: 20}", "age is 22" },
                 { "set brother.age with age + 10", "{brother:{}, age: 10}", "brother.age is 20" },
             })
-            .BDDfy<EvaluatorExpressionUnitTest>();
+            .BDDfy<JsonEvaluatorExpressionUnitTest>();
     }
 
     [Fact]
@@ -160,7 +159,7 @@ public class EvaluatorExpressionUnitTest
                     "{DiscountPercentage:40, DamageUnUseHistory: 10}", "DiscountPercentage is 70"
                 },
             })
-            .BDDfy<EvaluatorExpressionUnitTest>();
+            .BDDfy<JsonEvaluatorExpressionUnitTest>();
     }
 
     [Fact]
@@ -171,9 +170,9 @@ public class EvaluatorExpressionUnitTest
             {
                 { "OrderDate.AddDays(1)", "{OrderDate: '2020-10-12T00:00:00z'}", DateTime.Parse("2020-10-13") },
                 { $"Now() after or equal to {DateTime.Now:yyyy/MM/dd}", "{}", true },
-                { "personCities.GroupBy(def x => x.city, def x => x.person).Tehran.Count(def x => true)", 
-                    "{personCities: [{city: 'Tehran', person: 'ali'}]}",
-                    1 },
+                // { "personCities.GroupBy(def x => x.city, def x => x.person).Tehran.Count(def x => true)", 
+                //     "{personCities: [{city: 'Tehran', person: 'ali'}]}",
+                //     1 },
                 { "Cities.Exists(def x => x.name is 'Tehran')", "{Cities: [{name: 'Tehran'}]}", true },
                 { "Cities.Exists(def x => x.name is 'Shiraz')", "{Cities: [{name: 'Tehran'}]}", false },
                 { "Cities.Count(def x => x.name is 'Tehran')", "{Cities: [{name: 'Tehran'}]}", 1 },
@@ -193,6 +192,6 @@ public class EvaluatorExpressionUnitTest
                     true
                 }
             })
-            .BDDfy<EvaluatorExpressionUnitTest>();
+            .BDDfy<JsonEvaluatorExpressionUnitTest>();
     }
 }
