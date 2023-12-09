@@ -48,3 +48,38 @@ public record EvaluatorContextBuilder
 
     public EvaluatorContext Build() => new(_businessObject, _schema, _modules, _extensionMethods);
 }
+public record ClrEvaluatorContextBuilder
+{
+    public static ClrEvaluatorContextBuilder Default => new ClrEvaluatorContextBuilder()
+        .ScanAssemblyForExtensionMethod(typeof(AddDaysMethod).Assembly);
+
+    private object _businessObject = null!;
+    ImmutableList<Method> _extensionMethods = ImmutableList<Method>.Empty;
+    private readonly ImmutableList<Module> _modules = ImmutableList<Module>.Empty;
+
+    public ClrEvaluatorContextBuilder WithBusinessObject(object businessObject)
+    {
+        _businessObject = businessObject;
+        return this;
+    }
+
+    public ClrEvaluatorContextBuilder WithExtensionMethod(Method method)
+    {
+        _extensionMethods = _extensionMethods.Add(method);
+        return this;
+    }
+
+    public ClrEvaluatorContextBuilder ScanAssemblyForExtensionMethod(Assembly assembly)
+    {
+        foreach (var type in assembly.GetExportedTypes()
+                     .Where(t => typeof(Method).IsAssignableFrom(t) && !t.IsAbstract))
+        {
+            if (Activator.CreateInstance(type) is Method method)
+                WithExtensionMethod(method);
+        }
+
+        return this;
+    }
+
+    public ClrEvaluatorContext Build() => new(_businessObject, _modules, _extensionMethods);
+}

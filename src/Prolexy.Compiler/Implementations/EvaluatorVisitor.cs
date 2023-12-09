@@ -12,11 +12,11 @@ using AnonymousMethod = Prolexy.Compiler.Ast.AnonymousMethod;
 
 namespace Prolexy.Compiler.Implementations;
 
-public class EvaluatorVisitor : IAstVisitor<EvaluatorContext, EvaluatorResult>
+public class EvaluatorVisitor : IEvaluatorVisitor<EvaluatorContext, EvaluatorResult>
 {
     public EvaluatorResult VisitBinary(Binary binary, EvaluatorContext context)
     {
-        EvaluatorResult EvaluatorResult(JToken? value)
+        EvaluatorResult EvaluatorResult(JToken value)
         {
             return new EvaluatorResult(context, value);
         }
@@ -112,7 +112,7 @@ public class EvaluatorVisitor : IAstVisitor<EvaluatorContext, EvaluatorResult>
 
         if (result.Value is JObject left)
             return new EvaluatorResult(context with { Schema = context.Schema?.GetSubType(accessMember.Token.Value) },
-                GetValue(accessMember.Token.Value!, left));
+                GetValue(accessMember.Token.Value!, left, new Dictionary<string, object>()));
         return result.Context.BusinessObject is JObject jObject
             ? result with
             {
@@ -129,7 +129,7 @@ public class EvaluatorVisitor : IAstVisitor<EvaluatorContext, EvaluatorResult>
     public EvaluatorResult VisitImplicitAccessMember(ImplicitAccessMember implicitAccessMember,
         EvaluatorContext context)
     {
-        var value = GetValue(implicitAccessMember.Token.Value!, context.BusinessObject);
+        var value = GetValue(implicitAccessMember.Token.Value!, context.BusinessObject, context.Variables);
         return new EvaluatorResult(context with
         {
             Schema = context.Schema?.GetSubType(implicitAccessMember.Token.Value!),
@@ -137,26 +137,14 @@ public class EvaluatorVisitor : IAstVisitor<EvaluatorContext, EvaluatorResult>
         }, value);
     }
 
-    private static JToken? GetValue(string token, JToken context)
+    private static JToken GetValue(string token, JToken context, Dictionary<string, object> contextVariables)
     {
-        return context[token];
-        // var val = context[token];
-        // if (val == null) return null;
-        // return val.Type switch
-        // {
-        //     JTokenType.Float => (decimal)val,
-        //     JTokenType.Integer => (decimal)val,
-        //     JTokenType.Boolean => (bool)val,
-        //     JTokenType.Date => (DateTime)val,
-        //     JTokenType.String => (string)val!,
-        //     JTokenType.Object => (JObject)val!,
-        //     _ => null
-        // };
+        return contextVariables.TryGetValue(token, out var variable) ? (JToken)variable : context[token]!;
     }
 
     public EvaluatorResult VisitLiteral(LiteralPrimitive literalPrimitive, EvaluatorContext context)
     {
-        EvaluatorResult Result(JToken? value) => new EvaluatorResult(context, value);
+        EvaluatorResult Result(JToken value) => new EvaluatorResult(context, value);
         var complexLiteralMatch = new Regex(@"^\$\{([\w,\d]+):([\u0600-\u06FF,\w,\s]*):(enum|string|number)\}")
             .Match(literalPrimitive.Token.Value!);
         
@@ -198,10 +186,11 @@ public class EvaluatorVisitor : IAstVisitor<EvaluatorContext, EvaluatorResult>
     {
         var leftValue = call.MethodSelector.Visit(this, context).Value;
         var method = FindMethod(context, leftValue, call.MethodSelector.Token.Value);
-        return new EvaluatorResult(context, method.Eval(this, context, leftValue, call.Arguments));
+        var result = (dynamic)method.Eval(this, context, leftValue, call.Arguments);
+        return new EvaluatorResult(context, (JToken)result);
     }
 
-    private Method FindMethod(EvaluatorContext context, JToken? leftValue, string? methodName)
+    private Method FindMethod(EvaluatorContext context, JToken leftValue, string? methodName)
     {
         Method result = null;
         if (context.Schema is Schema schema)
@@ -220,5 +209,10 @@ public class EvaluatorVisitor : IAstVisitor<EvaluatorContext, EvaluatorResult>
     public EvaluatorResult VisitAnonymousMethod(AnonymousMethod anonymousMethod, EvaluatorContext context)
     {
         return anonymousMethod.Expression.Visit(this, context);
+    }
+
+    public IEvaluatorResult Visit(IAst ast, IEvaluatorContext context)
+    {
+        return ast.Visit(this, (EvaluatorContext)context);
     }
 }

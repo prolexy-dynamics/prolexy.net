@@ -4,5 +4,27 @@ using Prolexy.Compiler.ExtensionMethods;
 
 namespace Prolexy.Compiler.Models;
 
-public record EvaluatorContext(JToken? BusinessObject, IType? Schema, ImmutableList<Module> Modules,
-    ImmutableList<Method> ExtensionMethods);
+public interface IEvaluatorContext
+{
+    Dictionary<string, object> Variables { get; }
+    object BusinessObject { get; init; }
+    ImmutableList<Module> Modules { get; init; }
+    ImmutableList<Method> ExtensionMethods { get; init; }
+}
+
+public record EvaluatorContext(JToken BusinessObject, IType? Schema, ImmutableList<Module> Modules,
+    ImmutableList<Method> ExtensionMethods) : IEvaluatorContext
+{
+    public Dictionary<string, object> Variables { get; } = new();
+    object IEvaluatorContext.BusinessObject
+    {
+        get => BusinessObject;
+        init => BusinessObject = (JToken)value;
+    }
+}
+
+public record ClrEvaluatorContext(object BusinessObject, ImmutableList<Module> Modules,
+    ImmutableList<Method> ExtensionMethods) : IEvaluatorContext
+{
+    public Dictionary<string, object> Variables { get; } = new();
+}

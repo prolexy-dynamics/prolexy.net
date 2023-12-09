@@ -4,35 +4,35 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.Implementations;
 
-class RuleEvaluator<T> : IRuleEvaluator<T> where T : JToken
+class RuleEvaluator<TC, TR> : IRuleEvaluator<TC, TR>  where TC : IEvaluatorContext where TR : IEvaluatorResult
 {
     private readonly IAst _ast;
-    private readonly IAstVisitor<EvaluatorContext, EvaluatorResult> _visitor;
+    private readonly IEvaluatorVisitor _visitor;
 
-    public RuleEvaluator(IAst ast, IAstVisitor<EvaluatorContext, EvaluatorResult> visitor)
+    public RuleEvaluator(IAst ast, IEvaluatorVisitor visitor)
     {
         _ast = ast;
         _visitor = visitor;
     }
 
-    public T? Evaluate(EvaluatorContext evaluatorContext)
+    public TR? Evaluate(TC evaluatorContext)
     {
-        return (T?)_ast.Visit(_visitor, evaluatorContext).Value;
+        return (TR?)_visitor.Visit(_ast, evaluatorContext);
     }
 }
-class RuleEvaluator : IRuleEvaluator
-{
-    private readonly IAst _ast;
-    private readonly IAstVisitor<EvaluatorContext, EvaluatorResult> _visitor;
-
-    public RuleEvaluator(IAst ast, IAstVisitor<EvaluatorContext, EvaluatorResult> visitor)
-    {
-        _ast = ast;
-        _visitor = visitor;
-    }
-
-    public void Execute(EvaluatorContext evaluatorContext)
-    {
-        _ast.Visit(_visitor, evaluatorContext);
-    }
-}
+// class RuleEvaluator : IRuleEvaluator<EvaluatorContext>
+// {
+//     private readonly IAst _ast;
+//     private readonly IEvaluatorVisitor<EvaluatorContext, EvaluatorResult> _visitor;
+//
+//     public RuleEvaluator(IAst ast, IEvaluatorVisitor<EvaluatorContext, EvaluatorResult> visitor)
+//     {
+//         _ast = ast;
+//         _visitor = visitor;
+//     }
+//
+//     public void Execute(EvaluatorContext evaluatorContext)
+//     {
+//         _visitor.Visit(_ast, evaluatorContext);
+//     }
+// }

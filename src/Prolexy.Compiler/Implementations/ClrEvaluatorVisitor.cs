@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Prolexy.Compiler.Ast;
@@ -6,27 +7,41 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.Implementations;
 
-#pragma warning disable CS8600, CS8602, CS8605, CS8604
-public class ClrEvaluatorVisitor : IAstVisitor<EvaluatorContext, EvaluatorResult>
+public interface IEvaluatorVisitor<in T, out TR> : IAstVisitor<T, TR>, IEvaluatorVisitor
+    where T : IEvaluatorContext
+    where TR : IEvaluatorResult
 {
-    public EvaluatorResult VisitBinary(Binary binary, EvaluatorContext context)
+}
+#pragma warning disable CS8600, CS8602, CS8605, CS8604
+public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEvaluatorResult>
+{
+    public ClrEvaluatorResult VisitBinary(Binary binary, ClrEvaluatorContext context)
     {
-        EvaluatorResult EvaluatorResult(JToken? value)
+        ClrEvaluatorResult EvaluatorResult(object value)
         {
-            return new EvaluatorResult(context, value);
+            return new ClrEvaluatorResult(context, value);
         }
 
-        var left = (JValue)binary.Left.Visit(this, context).Value;
-        var right = (JValue)binary.Right.Visit(this, context).Value;
-
+        var left = binary.Left.Visit(this, context).Value;
+        var right = binary.Right.Visit(this, context).Value;
+        if (left != null) right = Convert.ChangeType(right, left.GetType());
+        var comparable = left as IComparable;
         switch (binary.Operation)
         {
-            case Operations.Is: return EvaluatorResult(Comparer<JValue>.Default.Compare(left, right) == 0);
-            case Operations.IsNot: return EvaluatorResult(Comparer<JValue>.Default.Compare(left, right) != 0);
-            case Operations.After: return EvaluatorResult((DateTime)left > (DateTime)right);
-            case Operations.AfterOrEq: return EvaluatorResult((DateTime)left >= (DateTime)right);
-            case Operations.Before: return EvaluatorResult((DateTime)left < (DateTime)right);
-            case Operations.BeforeOrEq: return EvaluatorResult((DateTime)left <= (DateTime)right);
+            case Operations.Eq:
+            case Operations.Is:
+                return EvaluatorResult(left is IComparable ? comparable.CompareTo(right) == 0 : left == right);
+            case Operations.Neq:
+            case Operations.IsNot:
+                return EvaluatorResult(left is IComparable ? comparable.CompareTo(right) != 0 : left != right);
+            case Operations.Gt:
+            case Operations.After: return EvaluatorResult((dynamic)left > (dynamic)right);
+            case Operations.Gte:
+            case Operations.AfterOrEq: return EvaluatorResult((dynamic)left >= (dynamic)right);
+            case Operations.Lt:
+            case Operations.Before: return EvaluatorResult((dynamic)left < (dynamic)right);
+            case Operations.Lte:
+            case Operations.BeforeOrEq: return EvaluatorResult((dynamic)left <= (dynamic)right);
             case Operations.Contains:
                 return EvaluatorResult(((string)left).Contains((string)right));
             case Operations.NotContains:
@@ -40,32 +55,18 @@ public class ClrEvaluatorVisitor : IAstVisitor<EvaluatorContext, EvaluatorResult
             case Operations.NotEndsWith:
                 return EvaluatorResult(!((string)left).EndsWith((string)right));
 
-
-            case Operations.Eq:
-                return EvaluatorResult((decimal?)left == (decimal?)right);
-            case Operations.Neq:
-                return EvaluatorResult((decimal?)left != (decimal?)right);
-            case Operations.Lt:
-                return EvaluatorResult((decimal?)left < (decimal?)right);
-            case Operations.Lte:
-                return EvaluatorResult((decimal?)left <= (decimal?)right);
-            case Operations.Gt:
-                return EvaluatorResult((decimal?)left > (decimal?)right);
-            case Operations.Gte:
-                return EvaluatorResult((decimal?)left >= (decimal?)right);
-
             case Operations.Plus:
                 return EvaluatorResult((dynamic)left + (dynamic)right);
             case Operations.Minus:
-                return EvaluatorResult((decimal)left - (decimal)right);
+                return EvaluatorResult((dynamic)left - (dynamic)right);
             case Operations.Multiply:
-                return EvaluatorResult((decimal)left * (decimal)right);
+                return EvaluatorResult((dynamic)left * (dynamic)right);
             case Operations.Devide:
-                return EvaluatorResult((decimal)left / (decimal)right);
+                return EvaluatorResult((dynamic)left / (dynamic)right);
             case Operations.Power:
-                return EvaluatorResult(Math.Pow((float)left, (float)right));
+                return EvaluatorResult(Math.Pow((double)left, (double)right));
             case Operations.Module:
-                return EvaluatorResult((decimal)left % (decimal)right);
+                return EvaluatorResult((dynamic)left % (dynamic)right);
 
             case Operations.Or:
                 return EvaluatorResult((bool)left || (bool)right);
@@ -76,85 +77,59 @@ public class ClrEvaluatorVisitor : IAstVisitor<EvaluatorContext, EvaluatorResult
         throw new NotImplementedException();
     }
 
-    public EvaluatorResult VisitAssignment(Assignment assignment, EvaluatorContext context)
+    public ClrEvaluatorResult VisitAssignment(Assignment assignment, ClrEvaluatorContext context)
     {
-        var property = (Property)GetProperty((dynamic)assignment.Left, context.BusinessObject);
-        property.Set((dynamic)assignment.Right.Visit(this, context).Value!);
-        return new EvaluatorResult(context, null);
+        var setter = (Action<object>)GetProperty((dynamic)assignment.Left, context.BusinessObject);
+        setter(assignment.Right.Visit(this, context).Value!);
+        return new ClrEvaluatorResult(context, null!);
     }
 
-    record Property(JToken Context, string Name)
-    {
-        public void Set(JToken value) => Context[Name] = value;
-        public JToken Get() => Context[Name] ?? (Context[Name] = JToken.Parse("{}"));
-    }
-
-    private Property GetProperty(ImplicitAccessMember ast, JToken context)
+    private Action<object> GetProperty(ImplicitAccessMember ast, object context)
     {
         var prop = ast.Token.Value!;
-        return new Property(context, prop);
+        var result = context.GetType().GetProperty(prop);
+        if (result == null) throw new PropertyNotFoundException(prop);
+        return (val) => result.SetValue(context, Convert.ChangeType(val, result.PropertyType));
     }
 
-    private Property GetProperty(AccessMember ast, JToken context)
+    private Action<object> GetProperty(AccessMember ast, object context)
     {
-        var prop = (Property)GetProperty((dynamic)ast.Left, context);
-        return new Property(prop.Get(), ast.Token.Value!);
+        var ctx = GetPropertyValue(ast.Left, context);
+        var property = ctx.GetType().GetProperty(ast.Token.Value);
+        return (val) => property.SetValue(ctx, Convert.ChangeType(val, property.PropertyType));
     }
 
-    public EvaluatorResult VisitAccessMember(AccessMember accessMember, EvaluatorContext context)
+    private object GetPropertyValue(IAst astLeft, object context)
     {
-        var result = accessMember.Left.Visit(this, context);
-
-        if (result.Value is JObject left)
-            return new EvaluatorResult(context with { Schema = context.Schema?.GetSubType(accessMember.Token.Value) },
-                GetValue(accessMember.Token.Value!, left));
-        return result.Context.BusinessObject is JObject jObject
-            ? result with
-            {
-                Context = result.Context with
-                {
-                    BusinessObject = jObject.GetValue(accessMember.Token.Value) != null
-                        ? jObject[accessMember.Token.Value]
-                        : JObject.Parse("{}")
-                }
-            }
-            : result;
+        var property = astLeft is ImplicitAccessMember imAst ? imAst.Token.Value : ((AccessMember)astLeft).Token.Value;
+        return context.GetType().GetProperty(property).GetValue(context)!;
     }
 
-    public EvaluatorResult VisitImplicitAccessMember(ImplicitAccessMember implicitAccessMember,
-        EvaluatorContext context)
+    public ClrEvaluatorResult VisitAccessMember(AccessMember accessMember, ClrEvaluatorContext context)
     {
-        var value = GetValue(implicitAccessMember.Token.Value!, context.BusinessObject);
-        return new EvaluatorResult(context with
-        {
-            Schema = context.Schema?.GetSubType(implicitAccessMember.Token.Value!),
-            BusinessObject = context.BusinessObject[implicitAccessMember.Token.Value]
-        }, value);
+        var result = accessMember.Left.Visit(this, context).Value;
+        var property = result.GetType().GetProperty(accessMember.Token.Value);
+        if (property != null)
+            return new ClrEvaluatorResult(context with { BusinessObject = result }, property.GetValue(result));
+        var method = result.GetType().GetMethod(accessMember.Token.Value);
+        return new ClrEvaluatorResult(context with { BusinessObject = result }, method);
     }
 
-    private static JToken? GetValue(string token, JToken context)
+    public ClrEvaluatorResult VisitImplicitAccessMember(ImplicitAccessMember implicitAccessMember,
+        ClrEvaluatorContext context)
     {
-        return context[token];
-        // var val = context[token];
-        // if (val == null) return null;
-        // return val.Type switch
-        // {
-        //     JTokenType.Float => (decimal)val,
-        //     JTokenType.Integer => (decimal)val,
-        //     JTokenType.Boolean => (bool)val,
-        //     JTokenType.Date => (DateTime)val,
-        //     JTokenType.String => (string)val!,
-        //     JTokenType.Object => (JObject)val!,
-        //     _ => null
-        // };
+        if (context.Variables.TryGetValue(implicitAccessMember.Token.Value, out var variable))
+            return new ClrEvaluatorResult(context, variable);
+        var property = context.BusinessObject.GetType().GetProperty(implicitAccessMember.Token.Value);
+        return new ClrEvaluatorResult(context, property?.GetValue(context.BusinessObject));
     }
 
-    public EvaluatorResult VisitLiteral(LiteralPrimitive literalPrimitive, EvaluatorContext context)
+    public ClrEvaluatorResult VisitLiteral(LiteralPrimitive literalPrimitive, ClrEvaluatorContext context)
     {
-        EvaluatorResult Result(JToken? value) => new EvaluatorResult(context, value);
+        ClrEvaluatorResult Result(object value) => new ClrEvaluatorResult(context, value);
         var complexLiteralMatch = new Regex(@"^\$\{([\w,\d]+):([\u0600-\u06FF,\w,\s]*):(enum|string|number)\}")
             .Match(literalPrimitive.Token.Value!);
-        
+
         if (complexLiteralMatch.Success)
         {
             var complexLiteral = complexLiteralMatch.Groups[1].Value;
@@ -173,47 +148,63 @@ public class ClrEvaluatorVisitor : IAstVisitor<EvaluatorContext, EvaluatorResult
         };
     }
 
-    public EvaluatorResult VisitStatements(Statement statement, EvaluatorContext context)
+    public ClrEvaluatorResult VisitStatements(Statement statement, ClrEvaluatorContext context)
     {
         statement.Statements.ForEach(st => st.Visit(this, context));
-        return new EvaluatorResult(context, null);
+        return new ClrEvaluatorResult(context, null);
     }
 
-    public EvaluatorResult VisitIfStatement(IfStatement ifStatement, EvaluatorContext context)
+    public ClrEvaluatorResult VisitIfStatement(IfStatement ifStatement, ClrEvaluatorContext context)
     {
         var condResult = ifStatement.Condition.Visit(this, context);
-        if (condResult.Value is not null && condResult.Value.Value<bool>())
+        if (condResult.Value.Equals(true))
             ifStatement.ThenStatement.Visit(this, context);
         else
             ifStatement.ElseStatement.Visit(this, context);
-        return new EvaluatorResult(context, null);
+        return new ClrEvaluatorResult(context, null);
     }
 
-    public EvaluatorResult VisitMethodCall(Call call, EvaluatorContext context)
+    public ClrEvaluatorResult VisitMethodCall(Call call, ClrEvaluatorContext context)
     {
-        var leftValue = call.MethodSelector.Visit(this, context).Value;
-        var method = FindMethod(context, leftValue, call.MethodSelector.Token.Value);
-        return new EvaluatorResult(context, method.Eval(this, context, leftValue, call.Arguments));
+        var leftValue = call.MethodSelector.Visit(this, context);
+        var contextMethod = leftValue.Value as MethodInfo;
+        if (contextMethod != null)
+        {
+            var args = call.Arguments.Select((arg, idx) => Convert.ChangeType(arg.Visit(this, context).Value,
+                contextMethod.GetParameters()[idx].ParameterType)).ToArray();
+            var result = contextMethod.Invoke(leftValue.Context.BusinessObject, args);
+            return new ClrEvaluatorResult(context, result);
+        }
+
+        var method = FindMethod(leftValue.Context, leftValue, call);
+        return leftValue with
+        {
+            Value = method.Eval(this, leftValue.Context, leftValue.Context.BusinessObject, call.Arguments)
+        };
     }
 
-    private Method FindMethod(EvaluatorContext context, JToken? leftValue, string? methodName)
+    private Method FindMethod(ClrEvaluatorContext context, ClrEvaluatorResult clrEvaluatorResult, Call call)
     {
         Method result = null;
-        if (context.Schema is Schema schema)
-            result = schema.Methods.FirstOrDefault(m => m.Name == methodName);
         result ??= context.ExtensionMethods
-            .FirstOrDefault(m => m.Accept(leftValue) && m.Name == methodName);
+            .FirstOrDefault(m => m.Accept(context.BusinessObject) &&
+                                 m.Name == call.MethodSelector.Token.Value);
 
         return result;
     }
 
-    public EvaluatorResult VisitPriority(Priority priority, EvaluatorContext context)
+    public ClrEvaluatorResult VisitPriority(Priority priority, ClrEvaluatorContext context)
     {
         return priority.InnerAst.Visit(this, context);
     }
 
-    public EvaluatorResult VisitAnonymousMethod(AnonymousMethod anonymousMethod, EvaluatorContext context)
+    public ClrEvaluatorResult VisitAnonymousMethod(AnonymousMethod anonymousMethod, ClrEvaluatorContext context)
     {
         return anonymousMethod.Expression.Visit(this, context);
+    }
+
+    IEvaluatorResult IEvaluatorVisitor.Visit(IAst ast, IEvaluatorContext context)
+    {
+        return ast.Visit(this, (ClrEvaluatorContext)context);
     }
 }

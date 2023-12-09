@@ -1,3 +1,4 @@
+using System.Collections;
 using Newtonsoft.Json.Linq;
 using Prolexy.Compiler.Ast;
 using Prolexy.Compiler.Implementations;
@@ -8,10 +9,11 @@ namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 public record MaxMethod() : EnumerationExtensionMethod("Max",
     PrimitiveType.Boolean)
 {
-    public override JToken? Eval(EvaluatorVisitor visitor, EvaluatorContext context, JToken methodContext,
+    public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
+        object methodContext,
         IEnumerable<IAst> args)
     {
-        if (methodContext.Type != JTokenType.Array)
+        if (methodContext is not IEnumerable items)
             throw new ArgumentException("Max method can execute on Array types.");
         var arguments = args as IAst[] ?? args.ToArray();
         if (!arguments.Any())
@@ -19,16 +21,14 @@ public record MaxMethod() : EnumerationExtensionMethod("Max",
         if (arguments.First() is not AnonymousMethod predicate)
             throw new ArgumentException("Selector is not Anonymous method.");
         var bo = context.BusinessObject ?? JObject.Parse("{}");
-        var oldValue = bo[predicate.Parameters[0].Value!];
         var max = decimal.MinValue;
-        foreach (var element in methodContext)
+        foreach (var element in items)
         {
-            bo[predicate.Parameters[0].Value!] = element;
-            max = Math.Max(max,
-                Convert.ToDecimal(predicate.Visit(visitor, context with { BusinessObject = bo }).Value));
+            context.Variables[predicate.Parameters[0].Value!] = element;
+            max = Math.Max(max, Convert.ToDecimal(visitor.Visit(predicate, context).Value));
         }
 
-        bo[predicate.Parameters[0].Value!] = oldValue;
+        context.Variables.Remove(predicate.Parameters[0].Value!);
         return max;
     }
 }

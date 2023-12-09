@@ -5,9 +5,10 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods;
 
-public abstract record Method(string Name, IType ReturnType) : IType
+public abstract record Method(string Name, IType ReturnType) : IMethod, IType
 {
-    public abstract JToken? Eval(EvaluatorVisitor visitor, EvaluatorContext context, JToken methodContext,
+    public abstract object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
+        object methodContext,
         IEnumerable<IAst> args);
 
     public IType? GetSubType(string name)
@@ -15,5 +16,20 @@ public abstract record Method(string Name, IType ReturnType) : IType
         return ReturnType;
     }
 
-    public abstract bool Accept(JToken? value);
+    public abstract bool Accept(object value);
+}
+
+public interface IMethod
+{
+    object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
+        object methodContext, IEnumerable<IAst> args);
+}
+
+public record ClrMethodMethod(string Name, IType ReturnType) : IMethod
+{
+    public object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
+        object methodContext, IEnumerable<IAst> args)
+    {
+        throw new NotImplementedException();
+    }
 }

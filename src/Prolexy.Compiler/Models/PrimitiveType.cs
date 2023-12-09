@@ -4,34 +4,39 @@ namespace Prolexy.Compiler.Models;
 
 public class PrimitiveType : IType
 {
-    private readonly JTokenType[] _acceptedTypes;
+    private readonly object[] _acceptedTypes;
     public string TypeName { get; }
 
-    public PrimitiveType(string typeName, JTokenType[] acceptedTypes)
+    public PrimitiveType(string typeName, object[] acceptedTypes)
     {
         _acceptedTypes = acceptedTypes;
         TypeName = typeName;
     }
 
     public static readonly PrimitiveType Number = new PrimitiveType("number",
-        new[] { JTokenType.Float, JTokenType.Integer });
+        new object[] { JTokenType.Float, JTokenType.Integer });
 
     public static readonly PrimitiveType String = new PrimitiveType("string",
-        new[] { JTokenType.String });
+        new object[] { JTokenType.String });
+
     public static readonly PrimitiveType Datetime = new PrimitiveType("datetime",
-        new[] { JTokenType.Date });
+        new object[] { JTokenType.Date });
+
     public static readonly PrimitiveType Boolean = new PrimitiveType("boolean",
-        new[] { JTokenType.Boolean });
+        new object[] { JTokenType.Boolean });
+
     public static readonly PrimitiveType Enum = new PrimitiveType("enum",
-        Array.Empty<JTokenType>());
+        Array.Empty<object>());
 
     public IType? GetSubType(string name)
     {
         return null;
     }
 
-    public bool Accept(JToken? value)
+    public bool Accept(object value)
     {
-        return _acceptedTypes.Any(a => a == value?.Type);
+        return value is JToken jValue
+            ? _acceptedTypes.Cast<JTokenType>().Any(a => a == jValue.Type)
+            : _acceptedTypes.Cast<Type>().Any(a => a.IsInstanceOfType(value));
     }
 }

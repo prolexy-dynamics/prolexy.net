@@ -15,8 +15,8 @@ public class EnumerableType : IType
         return null;
     }
 
-    public bool Accept(JToken? value)
+    public bool Accept(object value)
     {
-        return value.Type == JTokenType.Array;
+        return value is JArray;
     }
 }

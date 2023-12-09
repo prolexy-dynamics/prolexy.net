@@ -8,28 +8,29 @@ namespace Prolexy.Compiler.ExtensionMethods.DateTimeExtensions;
 public record AddDaysMethod() : Method("AddDays",
     PrimitiveType.Boolean)
 {
-    public override JToken? Eval(EvaluatorVisitor visitor, EvaluatorContext context, JToken methodContext, IEnumerable<IAst> args)
+    public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
+        object methodContext, IEnumerable<IAst> args)
     {
-        var days = Convert.ToInt32(args.First().Visit(visitor, context).Value);
+        var days = Convert.ToInt32(visitor.Visit(args.First(), context).Value);
         return Convert.ToDateTime(methodContext).AddDays(days);
-
     }
 
-    public override bool Accept(JToken? value)
+    public override bool Accept(object value)
     {
-        return value is { Type: JTokenType.Date };
+        return value is JToken { Type: JTokenType.Date } or DateTime;
     }
 }
 public record NowMethod() : Method("Now",
     PrimitiveType.Boolean)
 {
-    public override JToken? Eval(EvaluatorVisitor visitor, EvaluatorContext context, JToken methodContext, IEnumerable<IAst> args)
+    public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
+        object methodContext, IEnumerable<IAst> args)
     {
         return DateTime.Now;
     }
 
-    public override bool Accept(JToken? value)
+    public override bool Accept(object value)
     {
-        return value == null;
+        return true;
     }
 }

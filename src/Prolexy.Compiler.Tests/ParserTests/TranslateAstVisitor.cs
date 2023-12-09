@@ -1,4 +1,5 @@
 using Prolexy.Compiler.Ast;
+using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.Tests.ParserTests;
 
@@ -67,4 +68,5 @@ public class TranslateAstVisitor : IAstVisitor<FormatterContext, string>
     {
         return $"({string.Join(",", anonymousMethod.Parameters.Select(p => p.Value))}) => {anonymousMethod.Expression.Visit(this, context)}";
     }
+
 }

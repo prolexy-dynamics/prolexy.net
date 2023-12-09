@@ -7,21 +7,21 @@ namespace Prolexy.Compiler.Tests.Evaluator;
 
 public class Should_can_evaluate_expression_on_Clr_context
 {
-    private IRuleEvaluator<object> _evaluator = null!;
+    private IRuleEvaluator<ClrEvaluatorContext, ClrEvaluatorResult> _evaluator = null!;
     private object? _result;
 
     void GivenICompileInput(string expression)
     {
         var compiler = new Implementations.Compiler();
-        _evaluator = compiler.CompileAsExpression<JToken>(expression);
+        _evaluator = compiler.CompileExpression(expression).AsClrContext();
     }
 
-    void WhenEvaluateCompiledCode(string context)
+    void WhenEvaluateCompiledCode(object context)
     {
-        var ctx = EvaluatorContextBuilder.Default
-            .WithSchema(new Schema(new[] { new Property("OrderDate", PrimitiveType.Datetime) }, new Method[] { }))
-            .WithBusinessObject(JObject.Parse(context)).Build();
-        _result = _evaluator.Evaluate(ctx);
+        var ctx = ClrEvaluatorContextBuilder.Default
+            .WithBusinessObject(context)
+            .Build();
+        _result = _evaluator.Evaluate(ctx)?.Value;
     }
 
     void ThenISeeCSharpLikeSyntaxAsAnExpected(object? expected)

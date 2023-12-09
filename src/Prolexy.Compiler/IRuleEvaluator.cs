@@ -2,11 +2,11 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler;
 
-public interface IRuleEvaluator<out T>
+public interface IRuleEvaluator<in TC, out T> where TC : IEvaluatorContext 
 {
-    T? Evaluate(EvaluatorContext evaluatorContext);
+    T? Evaluate(TC evaluatorContext);
 }
-public interface IRuleEvaluator
+public interface IRuleEvaluator<in TC> where TC : IEvaluatorContext
 {
-    void Execute(EvaluatorContext evaluatorContext);
+    void Execute(TC evaluatorContext);
 }

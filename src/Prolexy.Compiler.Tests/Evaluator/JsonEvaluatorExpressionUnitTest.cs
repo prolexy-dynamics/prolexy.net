@@ -11,7 +11,7 @@ public class JsonEvaluatorExpressionUnitTest
     [Fact]
     public void Should_can_evaluate_literal()
     {
-        new Should_can_evaluate_expression()
+        new Should_can_evaluate_expression_on_Json_context()
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
                 { "'yaser'", "{}", "yaser" },
@@ -29,7 +29,7 @@ public class JsonEvaluatorExpressionUnitTest
     [Fact]
     public void Should_can_evaluate_access_member()
     {
-        new Should_can_evaluate_expression()
+        new Should_can_evaluate_expression_on_Json_context()
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
                 // { "name", "{name: 'yasser'}", "yasser" },
@@ -45,7 +45,7 @@ public class JsonEvaluatorExpressionUnitTest
     [Fact]
     public void Should_can_evaluate_relational_operation()
     {
-        new Should_can_evaluate_expression()
+        new Should_can_evaluate_expression_on_Json_context()
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
                 { "name is null", "{}", true },
@@ -166,7 +166,7 @@ public class JsonEvaluatorExpressionUnitTest
     [Fact]
     public void Should_can_evaluate_extension_method()
     {
-        new Should_can_evaluate_expression()
+        new Should_can_evaluate_expression_on_Json_context()
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
                 { "OrderDate.AddDays(1)", "{OrderDate: '2020-10-12T00:00:00z'}", DateTime.Parse("2020-10-13") },

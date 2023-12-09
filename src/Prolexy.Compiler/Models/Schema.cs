@@ -10,7 +10,7 @@ public record Schema(Property[] Properties, Method[] Methods) : IType
         return Properties.FirstOrDefault(p => p.Name == name) as IType ?? Methods.FirstOrDefault(m => m.Name == name);
     }
 
-    public bool Accept(JToken? value)
+    public bool Accept(object value)
     {
         return false;
     }
