@@ -51,6 +51,8 @@ public class ClrEvaluatorExpressionUnitTest
         new Should_can_evaluate_expression_on_Clr_context()
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
+                { "new Person('yasser').Name", new {  }, "yasser" },
+
                 { "name is null", new MyBusinessObject { }, true },
                 { "name is null", new MyBusinessObject { name = "" }, false },
                 { "name is firstName", new MyBusinessObject { }, true },
@@ -114,6 +116,7 @@ public class ClrEvaluatorExpressionUnitTest
 
                 { "accepted is true", new { accepted = true }, true },
                 { "accepted is not true", new { accepted = true }, false },
+                
             })
             .BDDfy<JsonEvaluatorExpressionUnitTest>();
     }

@@ -311,10 +311,10 @@ public class Parser : IParser
         return result;
     }
 
-    private Token? ConsumeOptional(string op, TokenType tokenType = TokenType.Operation)
+    private Token? ConsumeOptional(string tokenValue, TokenType tokenType = TokenType.Operation)
     {
         var head = Peek();
-        if (head.TokenType == tokenType && head.Value == op)
+        if (head.TokenType == tokenType && head.Value == tokenValue)
         {
             Advance();
             return head;
@@ -341,6 +341,10 @@ public class Parser : IParser
             throw ExpectedTokenTypes(new[] { TokenType.Const, TokenType.Identifier }, null);
         }
 
+        if (ConsumeOptional(Keywords.New, TokenType.Keyword) != null)
+        {
+            return ParseInstantiate();
+        }
         if (head.TokenType == TokenType.Identifier)
         {
             Advance();
@@ -370,6 +374,25 @@ public class Parser : IParser
 
         CloseSpan();
         throw ExpectedTokenTypes(new[] { TokenType.Const, TokenType.Identifier }, null);
+    }
+
+    private IAst ParseInstantiate()
+    {
+        var head = Peek();
+        if (head.TokenType != TokenType.Keyword && head.Value == Keywords.New)
+        {
+            CloseSpan();
+            throw ExpectedTokenTypes(new[] { TokenType.Identifier }, null);
+        }
+
+        var typeIdentification = head;
+        Advance();
+        if (ConsumeOptional(Operations.BeginParenthesis) == null)
+            throw ExpectedTokenTypes(new[] { TokenType.Operation }, new[] { Operations.BeginParenthesis });
+        var args = ParseArgs();
+        if (ConsumeOptional(Operations.EndParenthesis) == null)
+            throw ExpectedTokenTypes(new[] { TokenType.Operation }, new[] { Operations.EndParenthesis });
+        return new Instantiation(typeIdentification, args, CloseSpan());
     }
 
     private Exception ExpectedTokenTypes(TokenType[] p0, string[]? strings = null)

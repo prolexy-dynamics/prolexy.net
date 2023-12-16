@@ -111,7 +111,7 @@ public class EvaluatorVisitor : IEvaluatorVisitor<EvaluatorContext, EvaluatorRes
         var result = accessMember.Left.Visit(this, context);
 
         if (result.Value is JObject left)
-            return new EvaluatorResult(context with { Schema = context.Schema?.GetSubType(accessMember.Token.Value) },
+            return new EvaluatorResult(context with { Schema = context.Schema?.GetPropertyType(accessMember.Token.Value) },
                 GetValue(accessMember.Token.Value!, left, new Dictionary<string, object>()));
         return result.Context.BusinessObject is JObject jObject
             ? result with
@@ -132,7 +132,7 @@ public class EvaluatorVisitor : IEvaluatorVisitor<EvaluatorContext, EvaluatorRes
         var value = GetValue(implicitAccessMember.Token.Value!, context.BusinessObject, context.Variables);
         return new EvaluatorResult(context with
         {
-            Schema = context.Schema?.GetSubType(implicitAccessMember.Token.Value!),
+            Schema = context.Schema?.GetPropertyType(implicitAccessMember.Token.Value!),
             BusinessObject = context.BusinessObject[implicitAccessMember.Token.Value]
         }, value);
     }
@@ -209,6 +209,11 @@ public class EvaluatorVisitor : IEvaluatorVisitor<EvaluatorContext, EvaluatorRes
     public EvaluatorResult VisitAnonymousMethod(AnonymousMethod anonymousMethod, EvaluatorContext context)
     {
         return anonymousMethod.Expression.Visit(this, context);
+    }
+
+    public EvaluatorResult VisitInstantiation(Instantiation instantiation, EvaluatorContext context)
+    {
+        return new EvaluatorResult(context, JToken.Parse("{}"));
     }
 
     public IEvaluatorResult Visit(IAst ast, IEvaluatorContext context)

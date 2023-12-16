@@ -14,4 +14,5 @@ public interface IAstVisitor<in TContext, out TResult>
     TResult VisitMethodCall(Call call, TContext context);
     TResult VisitPriority(Priority priority, TContext context);
     TResult VisitAnonymousMethod(AnonymousMethod anonymousMethod, TContext context);
+    TResult VisitInstantiation(Instantiation instantiation, TContext context);
 }

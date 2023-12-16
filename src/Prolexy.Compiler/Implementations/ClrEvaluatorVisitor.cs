@@ -203,6 +203,25 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
         return anonymousMethod.Expression.Visit(this, context);
     }
 
+    public ClrEvaluatorResult VisitInstantiation(Instantiation instantiation, ClrEvaluatorContext context)
+    {
+        var typeToInstantiate = context.ClrTypes.Find(m => m.Name == instantiation.Typename.Value);
+
+        if (typeToInstantiate == null)
+        {
+            throw new TypeLoadException($"type {instantiation.Typename.Value} not found.");
+        }
+
+        var constructorInfo = typeToInstantiate.Type.GetConstructors()
+            .SingleOrDefault(ctor => ctor.GetParameters().Length == instantiation.Arguments.Count);
+        if (constructorInfo == null)
+            throw new ArgumentException($"constructor of type {typeToInstantiate.Name} parameters mismatched.");
+        var args = instantiation.Arguments.Select((arg, idx) => Convert.ChangeType(arg.Visit(this, context).Value,
+            constructorInfo.GetParameters()[idx].ParameterType)).ToArray();
+        var result = constructorInfo.Invoke(args);
+        return new ClrEvaluatorResult(context, result);
+    }
+
     IEvaluatorResult IEvaluatorVisitor.Visit(IAst ast, IEvaluatorContext context)
     {
         return ast.Visit(this, (ClrEvaluatorContext)context);

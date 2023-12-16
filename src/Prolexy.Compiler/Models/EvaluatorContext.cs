@@ -23,7 +23,9 @@ public record EvaluatorContext(JToken BusinessObject, IType? Schema, ImmutableLi
     }
 }
 
-public record ClrEvaluatorContext(object BusinessObject, ImmutableList<Module> Modules,
+public record ClrEvaluatorContext(object BusinessObject, 
+    ImmutableList<ClrType> ClrTypes,
+    ImmutableList<Module> Modules,
     ImmutableList<Method> ExtensionMethods) : IEvaluatorContext
 {
     public Dictionary<string, object> Variables { get; } = new();

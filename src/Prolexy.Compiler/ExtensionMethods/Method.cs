@@ -11,7 +11,7 @@ public abstract record Method(string Name, IType ReturnType) : IMethod, IType
         object methodContext,
         IEnumerable<IAst> args);
 
-    public IType? GetSubType(string name)
+    public IType? GetPropertyType(string name)
     {
         return ReturnType;
     }

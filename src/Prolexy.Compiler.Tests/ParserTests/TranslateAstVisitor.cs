@@ -69,4 +69,9 @@ public class TranslateAstVisitor : IAstVisitor<FormatterContext, string>
         return $"({string.Join(",", anonymousMethod.Parameters.Select(p => p.Value))}) => {anonymousMethod.Expression.Visit(this, context)}";
     }
 
+    public string VisitInstantiation(Instantiation instantiation, FormatterContext context)
+    {
+        var args = string.Join(", ", instantiation.Arguments.Select(a => a.Visit(this, context)?.ToString()));
+        return $"new {instantiation.Typename}({args})";
+    }
 }

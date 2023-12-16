@@ -48,18 +48,26 @@ public record EvaluatorContextBuilder
 
     public EvaluatorContext Build() => new(_businessObject, _schema, _modules, _extensionMethods);
 }
+
 public record ClrEvaluatorContextBuilder
 {
     public static ClrEvaluatorContextBuilder Default => new ClrEvaluatorContextBuilder()
         .ScanAssemblyForExtensionMethod(typeof(AddDaysMethod).Assembly);
 
     private object _businessObject = null!;
+    ImmutableList<ClrType> _clrTypes = ImmutableList<ClrType>.Empty;
     ImmutableList<Method> _extensionMethods = ImmutableList<Method>.Empty;
     private readonly ImmutableList<Module> _modules = ImmutableList<Module>.Empty;
 
     public ClrEvaluatorContextBuilder WithBusinessObject(object businessObject)
     {
         _businessObject = businessObject;
+        return this;
+    }
+
+    public ClrEvaluatorContextBuilder AddClrType<T>()
+    {
+        _clrTypes = _clrTypes.Add(new ClrType<T>());
         return this;
     }
 
@@ -81,5 +89,9 @@ public record ClrEvaluatorContextBuilder
         return this;
     }
 
-    public ClrEvaluatorContext Build() => new(_businessObject, _modules, _extensionMethods);
+    public ClrEvaluatorContext Build() => new(
+        _businessObject,
+        _clrTypes,
+        _modules,
+        _extensionMethods);
 }

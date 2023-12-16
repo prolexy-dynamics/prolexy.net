@@ -13,5 +13,6 @@ public static class Keywords
     public const string Def = "def";
     public const string True = "true";
     public const string False = "false";
-    public static string[] AllKeywords = new[] { If, Set, Call, With, Else, Then, AndThen, End, True, False, Def };
+    public const string New = "new";
+    public static string[] AllKeywords = new[] { If, Set, Call, With, Else, Then, AndThen, End, True, False, Def, New };
 }

@@ -10,7 +10,7 @@ public class EnumerableType : IType
     {
         ElementType = elementType;
     }
-    public IType? GetSubType(string name)
+    public IType? GetPropertyType(string name)
     {
         return null;
     }

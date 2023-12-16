@@ -20,6 +20,7 @@ public class Should_can_evaluate_expression_on_Clr_context
     {
         var ctx = ClrEvaluatorContextBuilder.Default
             .WithBusinessObject(context)
+            .AddClrType<Person>()
             .Build();
         _result = _evaluator.Evaluate(ctx)?.Value;
     }
@@ -31,4 +32,9 @@ public class Should_can_evaluate_expression_on_Clr_context
         else
             Convert.ChangeType(_result, expected.GetType()).Should().Be(expected);
     }
+}
+
+public class Person(string name)
+{
+    public string Name { get; } = name;
 }

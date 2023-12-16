@@ -28,7 +28,7 @@ public class PrimitiveType : IType
     public static readonly PrimitiveType Enum = new PrimitiveType("enum",
         Array.Empty<object>());
 
-    public IType? GetSubType(string name)
+    public IType? GetPropertyType(string name)
     {
         return null;
     }
