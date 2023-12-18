@@ -473,7 +473,7 @@ public class Parser : IParser
         {
             parameters.Add(head);
             Advance();
-            if (ConsumeOptional(Operations.Point) is null)
+            if (ConsumeOptional(Operations.Comma) is null)
                 break;
             head = Peek();
         }

@@ -1,12 +1,10 @@
 using System.Collections;
-using Newtonsoft.Json.Linq;
 using Prolexy.Compiler.Ast;
-using Prolexy.Compiler.Implementations;
 using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
-public record SumMethod() : EnumerationExtensionMethod("Sum",
+public record AggregateMethod() : EnumerationExtensionMethod("Aggregate",
     PrimitiveType.Boolean)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
@@ -14,20 +12,22 @@ public record SumMethod() : EnumerationExtensionMethod("Sum",
         IEnumerable<IAst> args)
     {
         if (methodContext is not IEnumerable items)
-            throw new ArgumentException("Sum method can execute on Array types.");
+            throw new ArgumentException("Aggregate method can execute on Array types.");
         var arguments = args as IAst[] ?? args.ToArray();
         if (!arguments.Any())
-            throw new ArgumentException("Selector not provided for 'Sum' method");
+            throw new ArgumentException("Selector not provided for 'Aggregate' method");
         if (arguments.First() is not AnonymousMethod predicate)
             throw new ArgumentException("Selector is not Anonymous method.");
-        var sum = new decimal(0);
+        var result = visitor.Visit(arguments[1], context).Value;
         foreach (var element in items)
         {
-            context.Variables[predicate.Parameters[0].Value!] = element;
-            sum += Convert.ToDecimal(visitor.Visit(predicate, context).Value);
+            context.Variables[predicate.Parameters[0].Value!] = result;
+            context.Variables[predicate.Parameters[1].Value!] = element;
+            result = visitor.Visit(predicate, context).Value;
         }
 
         context.Variables.Remove(predicate.Parameters[0].Value!);
-        return sum;
+        context.Variables.Remove(predicate.Parameters[1].Value!);
+        return result;
     }
 }

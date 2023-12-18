@@ -34,7 +34,12 @@ public class Should_can_evaluate_expression_on_Clr_context
     }
 }
 
-public class Person(string name)
+public class Person
 {
-    public string Name { get; } = name;
+    public Person(string name)
+    {
+        Name = name;
+    }
+
+    public string Name { get; }
 }

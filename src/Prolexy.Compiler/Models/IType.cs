@@ -7,17 +7,27 @@ public interface IType
     IType? GetPropertyType(string name);
 }
 
-public class ClrType(Type type) : IType
+public class ClrType : IType
 {
-    public string Name => type.Name;
-    public Type Type => type;
+    private readonly Type _type;
+
+    public ClrType(Type type)
+    {
+        _type = type;
+    }
+
+    public string Name => _type.Name;
+    public Type Type => _type;
     public IType? GetPropertyType(string name)
     {
-        var prop = type.GetProperty(name);
+        var prop = _type.GetProperty(name);
         return prop != null ? new ClrType(prop.PropertyType) : null;
     }
 }
 
-public class ClrType<T>() : ClrType(typeof(T))
+public class ClrType<T> : ClrType
 {
+    public ClrType() : base(typeof(T))
+    {
+    }
 }

@@ -83,7 +83,7 @@ public class Lexer
             {
                 result = match;
                 if ((match.TokenType != TokenType.Keyword && match.TokenType != TokenType.Operation) || match.RemainingText?.Length == 0 ||
-                    !char.IsAsciiLetterOrDigit(match.RemainingText![0]))
+                    !char.IsAscii(match.RemainingText![0]))
                     return match;
             }
         }
