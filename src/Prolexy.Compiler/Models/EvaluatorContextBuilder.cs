@@ -39,7 +39,8 @@ public record EvaluatorContextBuilder
         foreach (var type in assembly.GetExportedTypes()
                      .Where(t => typeof(Method).IsAssignableFrom(t) && !t.IsAbstract))
         {
-            if (Activator.CreateInstance(type) is Method method)
+            if (type.GetConstructors().Any(c => c.GetParameters().Length == 0) &&
+                Activator.CreateInstance(type) is Method method)
                 WithExtensionMethod(method);
         }
 
