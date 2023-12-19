@@ -83,7 +83,7 @@ public class Lexer
             {
                 result = match;
                 if ((match.TokenType != TokenType.Keyword && match.TokenType != TokenType.Operation) || match.RemainingText?.Length == 0 ||
-                    !char.IsAscii(match.RemainingText![0]))
+                    !IsAsciiLetterOrDigit(match.RemainingText![0]))
                     return match;
             }
         }
@@ -173,4 +173,9 @@ public class Lexer
         public string? RemainingText { get; set; }
         public string? Type { get; set; }
     }
+    public static bool IsAsciiLetterOrDigit(char c) => IsAsciiLetter(c) | IsBetween(c, '0', '9');
+
+    public static bool IsAsciiLetter(char c) => (uint)((c | 0x20) - 'a') <= 'z' - 'a';
+    public static bool IsBetween(char c, char minInclusive, char maxInclusive) =>
+        (uint)(c - minInclusive) <= (uint)(maxInclusive - minInclusive);
 }
