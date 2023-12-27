@@ -4,7 +4,17 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
-public record AggregateMethod() : EnumerationExtensionMethod("Aggregate",
+public record AggregateMethod() : EnumerationExtensionMethod("Aggregate", new Parameter[]
+    {
+        new("initialState", new GenericType("TA")),
+        new("aggregator",
+            new MethodSignature(new Parameter[]
+                {
+                    new("accumulate", new GenericType("TA")),
+                    new("element", new GenericType("TE"))
+                },
+                PrimitiveType.Boolean))
+    },
     PrimitiveType.Boolean)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,

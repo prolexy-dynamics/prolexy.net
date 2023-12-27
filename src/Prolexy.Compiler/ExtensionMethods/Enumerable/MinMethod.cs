@@ -6,8 +6,16 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
-public record MinMethod() : EnumerationExtensionMethod("Min",
-    PrimitiveType.Boolean)
+public record MinMethod() : EnumerationExtensionMethod("Min", new Parameter[]
+    {
+        new("selector",
+            new MethodSignature(new Parameter[]
+                {
+                    new("element", new GenericType("T"))
+                },
+                PrimitiveType.Number))
+    },
+    PrimitiveType.Number)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,
@@ -20,7 +28,7 @@ public record MinMethod() : EnumerationExtensionMethod("Min",
             throw new ArgumentException("Selector not provided for 'Min' method");
         if (arguments.First() is not AnonymousMethod predicate)
             throw new ArgumentException("Selector is not Anonymous method.");
-        
+
         var min = decimal.MaxValue;
         foreach (var element in items)
         {

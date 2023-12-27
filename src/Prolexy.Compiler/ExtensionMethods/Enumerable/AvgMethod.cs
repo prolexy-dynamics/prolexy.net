@@ -7,7 +7,16 @@ using Prolexy.Compiler.Models;
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
 public record AvgMethod() : EnumerationExtensionMethod("Avg",
-    PrimitiveType.Boolean)
+    new Parameter[]
+    {
+        new("selector",
+            new MethodSignature(new Parameter[]
+                {
+                    new("element", new GenericType("T"))
+                },
+                PrimitiveType.Number))
+    },
+    PrimitiveType.Number)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,
@@ -25,10 +34,11 @@ public record AvgMethod() : EnumerationExtensionMethod("Avg",
         foreach (var element in items)
         {
             context.Variables[predicate.Parameters[0].Value!] = element;
-        
+
             sum += Convert.ToDecimal(visitor.Visit(predicate, context).Value);
             count++;
         }
+
         context.Variables.Remove(predicate.Parameters[0].Value!);
 
         return count == 0 ? 0 : sum / count;

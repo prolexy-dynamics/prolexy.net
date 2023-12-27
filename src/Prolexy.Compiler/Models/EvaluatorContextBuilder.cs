@@ -74,7 +74,10 @@ public record ClrEvaluatorContextBuilder
 
     public ClrEvaluatorContextBuilder WithExtensionMethod(Method method)
     {
-        _extensionMethods = _extensionMethods.Add(method);
+        var old = _extensionMethods.Find(m => m.Name == method.Name);
+        _extensionMethods = old != null
+            ? _extensionMethods.Replace(old, method)
+            : _extensionMethods.Add(method);
         return this;
     }
 

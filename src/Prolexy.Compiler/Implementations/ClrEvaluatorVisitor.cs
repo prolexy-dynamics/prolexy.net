@@ -111,8 +111,8 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
         var property = result.GetType().GetProperty(accessMember.Token.Value);
         if (property != null)
             return new ClrEvaluatorResult(context with { BusinessObject = result }, property.GetValue(result));
-        var method = result.GetType().GetMethod(accessMember.Token.Value);
-        return new ClrEvaluatorResult(context with { BusinessObject = result }, method);
+        return new ClrEvaluatorResult(context with { BusinessObject = result },
+            new MethodSelector(result, accessMember.Token.Value));
     }
 
     public ClrEvaluatorResult VisitImplicitAccessMember(ImplicitAccessMember implicitAccessMember,
@@ -140,7 +140,11 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
 
         return literalPrimitive.Token.Type switch
         {
-            "string" => Result(literalPrimitive.Token.Value!.Substring(1, literalPrimitive.Token.Value.Length - 2)),
+            "string" => Result(literalPrimitive.Token.Value!
+                .Substring(1, literalPrimitive.Token.Value.Length - 2)
+                .Replace("\\\\", "\\")
+                .Replace("\\n", "\n")
+                .Replace("\\r", "\r")),
             "datetime" => Result(DateTime.Parse(literalPrimitive.Token.Value!)),
             "number" => Result(decimal.Parse(literalPrimitive.Token.Value!)),
             "boolean" => Result(bool.Parse(literalPrimitive.Token.Value!)),
@@ -167,20 +171,28 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
     public ClrEvaluatorResult VisitMethodCall(Call call, ClrEvaluatorContext context)
     {
         var leftValue = call.MethodSelector.Visit(this, context);
-        var contextMethod = leftValue.Value as MethodInfo;
-        if (contextMethod != null)
-        {
-            var args = call.Arguments.Select((arg, idx) => Convert.ChangeType(arg.Visit(this, context).Value,
-                contextMethod.GetParameters()[idx].ParameterType)).ToArray();
-            var result = contextMethod.Invoke(leftValue.Context.BusinessObject, args);
-            return new ClrEvaluatorResult(context, result);
-        }
 
+        var contextMethod = CreateInvokerIfClrMethodFound();
+        if (contextMethod != null)
+            return new ClrEvaluatorResult(context, contextMethod.Invoke());
+        
         var method = FindMethod(leftValue.Context, leftValue, call);
         return leftValue with
         {
-            Value = method.Eval(this, leftValue.Context, leftValue.Context.BusinessObject, call.Arguments)
+            Value = method.Eval(this, context, leftValue.Context.BusinessObject, call.Arguments)
         };
+
+        Func<object?>? CreateInvokerIfClrMethodFound()
+        {
+            if (leftValue.Value is not MethodSelector methodSelector) return null;
+            if (call.Arguments.Any(a => a is AnonymousMethod)) return null;
+            var args = call.Arguments.Select(arg =>
+                arg.Visit(this, context).Value).ToArray();
+            var methodInfo = methodSelector.FindMethod(args);
+            return methodInfo != null 
+                ? () => methodInfo.Invoke(leftValue.Context.BusinessObject, args)
+                : null;
+        }
     }
 
     private Method FindMethod(ClrEvaluatorContext context, ClrEvaluatorResult clrEvaluatorResult, Call call)
@@ -212,18 +224,47 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
             throw new TypeLoadException($"type {instantiation.Typename.Value} not found.");
         }
 
+        var args = instantiation.Arguments.Select((arg, idx) => arg.Visit(this, context).Value).ToArray();
+
         var constructorInfo = typeToInstantiate.Type.GetConstructors()
-            .SingleOrDefault(ctor => ctor.GetParameters().Length == instantiation.Arguments.Count);
+            .SingleOrDefault(ctor => ctor.GetParameters().Length == instantiation.Arguments.Count &&
+                                     args.Select((a, i) => ctor.GetParameters()[i].ParameterType.IsInstanceOfType(a))
+                                         .All(a => a));
         if (constructorInfo == null)
             throw new ArgumentException($"constructor of type {typeToInstantiate.Name} parameters mismatched.");
-        var args = instantiation.Arguments.Select((arg, idx) => Convert.ChangeType(arg.Visit(this, context).Value,
-            constructorInfo.GetParameters()[idx].ParameterType)).ToArray();
-        var result = constructorInfo.Invoke(args);
+        var result = constructorInfo.Invoke(constructorInfo
+            .GetParameters()
+            .Select((p, i) => Convert.ChangeType(args[i], p.ParameterType))
+            .ToArray());
         return new ClrEvaluatorResult(context, result);
     }
 
     IEvaluatorResult IEvaluatorVisitor.Visit(IAst ast, IEvaluatorContext context)
     {
         return ast.Visit(this, (ClrEvaluatorContext)context);
+    }
+}
+
+public class MethodSelector
+{
+    private readonly object _objectContext;
+    private readonly string _methodName;
+
+    public MethodSelector(object objectContext, string methodName)
+    {
+        _objectContext = objectContext;
+        _methodName = methodName;
+    }
+
+    public MethodInfo? FindMethod(object[] args)
+    {
+        return _objectContext.GetType()
+            .GetMethods()
+            .SingleOrDefault(m =>
+                m.Name == _methodName &&
+                m.GetParameters().Length == args.Length &&
+                m.GetParameters().Select((p, idx) =>
+                        p.ParameterType.IsInstanceOfType(args[idx]))
+                    .All(cond => cond));
     }
 }

@@ -7,7 +7,16 @@ using Prolexy.Compiler.Models;
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
 public record MaxMethod() : EnumerationExtensionMethod("Max",
-    PrimitiveType.Boolean)
+    new Parameter[]
+    {
+        new("selector",
+            new MethodSignature(new Parameter[]
+                {
+                    new("element", new GenericType("T"))
+                },
+                PrimitiveType.Number))
+    },
+    PrimitiveType.Number)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,

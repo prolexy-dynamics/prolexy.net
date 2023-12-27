@@ -4,7 +4,8 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
-public abstract record EnumerationExtensionMethod(string Name, IType ReturnType) : Method(Name, ReturnType)
+public abstract record EnumerationExtensionMethod(string Name, IEnumerable<Parameter> Parameters, IType ReturnType) : 
+    Method(Name, Parameters, ReturnType)
 {
     public override bool Accept(object value)
     {

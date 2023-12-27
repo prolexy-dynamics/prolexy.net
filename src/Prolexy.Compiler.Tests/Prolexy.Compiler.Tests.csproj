@@ -31,8 +31,4 @@
       <ProjectReference Include="..\Prolexy.Compiler\Prolexy.Compiler.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Parser" />
-    </ItemGroup>
-
 </Project>

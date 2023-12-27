@@ -7,7 +7,16 @@ using Prolexy.Compiler.Models;
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
 public record CountMethod() : EnumerationExtensionMethod("Count",
-    PrimitiveType.Boolean)
+    new Parameter[]
+    {
+        new("predicate",
+            new MethodSignature(new Parameter[]
+                {
+                    new("element", new GenericType("T"))
+                },
+                PrimitiveType.Boolean))
+    },
+    PrimitiveType.Number)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,

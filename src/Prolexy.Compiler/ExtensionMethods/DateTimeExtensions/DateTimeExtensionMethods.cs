@@ -5,7 +5,7 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.DateTimeExtensions;
 
-public record AddDaysMethod() : Method("AddDays",
+public record AddDaysMethod() : Method("AddDays", new[] { new Parameter("days", PrimitiveType.Number) },
     PrimitiveType.Boolean)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
@@ -20,7 +20,8 @@ public record AddDaysMethod() : Method("AddDays",
         return value is JToken { Type: JTokenType.Date } or DateTime;
     }
 }
-public record NowMethod() : Method("Now",
+
+public record NowMethod() : Method("Now", Array.Empty<Parameter>(),
     PrimitiveType.Boolean)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,

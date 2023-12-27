@@ -19,7 +19,7 @@ public class Should_can_evaluate_expression_on_Json_context
     void WhenEvaluateCompiledCode(string context)
     {
         var ctx = EvaluatorContextBuilder.Default
-            .WithSchema(new Schema(new[] { new Property("OrderDate", PrimitiveType.Datetime) }, new Method[] { }))
+            .WithSchema(new Schema("Order", new[] { new Property("OrderDate", PrimitiveType.Datetime) }, new Method[] { }))
             .WithBusinessObject(JObject.Parse(context)).Build();
         _result = _evaluator.Evaluate(ctx)?.Value;
     }
