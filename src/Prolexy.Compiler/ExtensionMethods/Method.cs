@@ -6,7 +6,7 @@ using Prolexy.Compiler.SchemaGenerators;
 
 namespace Prolexy.Compiler.ExtensionMethods;
 
-public record MethodSignature(IEnumerable<Parameter> Parameters, IType ReturnType) : IMethod
+public record MethodSignature(IType ContextType, IEnumerable<Parameter> Parameters, IType ReturnType) : IMethod
 {
     public string Name => "AnonymousMethod";
     public IType? GetPropertyType(string name)
@@ -16,7 +16,11 @@ public record MethodSignature(IEnumerable<Parameter> Parameters, IType ReturnTyp
 
     public ITypeData GetTypeData(SchemaGenerator generator)
     {
-        return null;
+        return new MethodData( Name,
+            ContextType.GetTypeData(generator),
+            Parameters.Select(p => new ParameterData(p.ParameterName, p.ParameterType.GetTypeData(generator))),
+            ReturnType.GetTypeData(generator)
+        );
     }
 
     public object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context, object methodContext, IEnumerable<IAst> args)
@@ -26,11 +30,12 @@ public record MethodSignature(IEnumerable<Parameter> Parameters, IType ReturnTyp
 }
 public abstract record Method : IMethod
 {
-    protected Method(string Name, IEnumerable<Parameter> Parameters, IType ReturnType)
+    protected Method(string name, IType contextType, IEnumerable<Parameter> parameters, IType returnType)
     {
-        this.Name = Name;
-        this.MutableParameters = Parameters.ToList();
-        this.ReturnType = ReturnType;
+        Name = name;
+        ContextType = contextType;
+        MutableParameters = parameters.ToList();
+        ReturnType = returnType;
     }
 
     public abstract object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
@@ -44,12 +49,12 @@ public abstract record Method : IMethod
 
     public ITypeData GetTypeData(SchemaGenerator generator)
     {
-        return new MethodData
-        {
-            Name = Name,
-            Parameters = Parameters.Select(p => new ParameterData(p.ParameterName, p.ParameterType.GetTypeData(generator))),
-            ReturnTypeData = ReturnType.GetTypeData(generator)
-        };
+        return new MethodData(
+             Name,
+             ContextType.GetTypeData(generator),
+             Parameters.Select(p => new ParameterData(p.ParameterName, p.ParameterType.GetTypeData(generator))),
+             ReturnType.GetTypeData(generator)
+        );
     }
 
     public abstract bool Accept(object value);
@@ -59,7 +64,9 @@ public abstract record Method : IMethod
         return this.GetType() == other.GetType() && Name == other.Name;
     }
 
+
     public string Name { get; init; }
+    public IType ContextType { get; init; }
     protected List<Parameter> MutableParameters { get; init; }
     public IEnumerable<Parameter> Parameters => MutableParameters;
     public IType ReturnType { get; init; }

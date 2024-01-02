@@ -6,7 +6,7 @@ namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
 public record FirstMethod() : EnumerationExtensionMethod("First", 
     Array.Empty<Parameter>(),
-    new GenericType("T"))
+    new GenericType("TElement"))
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,

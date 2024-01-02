@@ -6,18 +6,24 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
-public record SumMethod() : EnumerationExtensionMethod("Sum",
-    new Parameter[]
-    {
-        new("selector",
-            new MethodSignature(new Parameter[]
-                {
-                    new("element", new GenericType("T"))
-                },
-                PrimitiveType.Number))
-    },
-    PrimitiveType.Number)
+public record SumMethod : EnumerationExtensionMethod
 {
+    public SumMethod() : base("Sum", 
+        Array.Empty<Parameter>(),
+        PrimitiveType.Number)
+    {
+        MutableParameters = new List<Parameter>
+        {
+            new("selector",
+                new MethodSignature(PrimitiveType.Void,
+                    new Parameter[]
+                    {
+                        new("element", new GenericType("TElement"))
+                    },
+                    PrimitiveType.Number))
+        };
+    }
+
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,
         IEnumerable<IAst> args)

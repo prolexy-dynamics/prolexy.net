@@ -23,6 +23,7 @@ public class ContextSchema
 {
     public ComplexTypeData BusinessObjectTypeData { get; set; }
     public IEnumerable<MethodData> ExtensionMethods { get; set; }
+    public IEnumerable<ComplexTypeData> ComplexDataTypes { get; set; }
 }
 public enum TypeCategory
 {
@@ -31,28 +32,38 @@ public enum TypeCategory
     Complex,
     Method,
     Enumerable,
-    Generic
+    Generic,
+    ReferenceType
 }
 
 public record ComplexTypeData : ITypeData 
 {
-    public ComplexTypeData(string Name, IEnumerable<PropertyData> Peroperties, IEnumerable<MethodData> Methods)
+    public ComplexTypeData(string Name,
+        IEnumerable<PropertyData> Properties,
+        IEnumerable<MethodData> Methods,
+        IEnumerable<MethodData> Constructors)
     {
         this.Name = Name;
-        this.Peroperties = Peroperties;
+        this.Properties = Properties;
         this.Methods = Methods;
+        this.Constructors = Constructors;
     }
 
     public TypeCategory Category => TypeCategory.Complex;
     public string Name { get; init; }
-    public IEnumerable<PropertyData> Peroperties { get; init; }
+    public IEnumerable<PropertyData> Properties { get; init; }
     public IEnumerable<MethodData> Methods { get; init; }
+    public IEnumerable<MethodData> Constructors { get; init; }
 
-    public void Deconstruct(out string Name, out IEnumerable<PropertyData> Peroperties, out IEnumerable<MethodData> Methods)
+    public void Deconstruct(out string Name,
+        out IEnumerable<PropertyData> Properties,
+        out IEnumerable<MethodData> Methods,
+        out IEnumerable<MethodData> Constructors)
     {
         Name = this.Name;
-        Peroperties = this.Peroperties;
+        Properties = this.Properties;
         Methods = this.Methods;
+        Constructors = this.Constructors;
     }
 }
 
@@ -66,7 +77,7 @@ public record PropertyData
 
     public string PropertyName { get; set; }
     public ITypeData PropertyType { get; set; }
-
+    
     public void Deconstruct(out string PropertyName, out ITypeData PropertyType)
     {
         PropertyName = this.PropertyName;
@@ -76,10 +87,18 @@ public record PropertyData
 
 public record MethodData : ITypeData
 {
+    public MethodData(string name, ITypeData contextType, IEnumerable<ParameterData> parameters, ITypeData returnType)
+    {
+        Name = name;
+        ContextType = contextType;
+        Parameters = parameters;
+        ReturnType = returnType;
+    }
     public string Name { get; set; }
+    public ITypeData ContextType { get; set; }
     public TypeCategory Category => TypeCategory.Method;
     public IEnumerable<ParameterData> Parameters { get; set; }
-    public ITypeData ReturnTypeData { get; set; }
+    public ITypeData ReturnType { get; set; }
 }
 
 public record ParameterData
@@ -95,12 +114,24 @@ public record ParameterData
 
 public record EnumerableTypeData : ITypeData
 {
-    public string Name { get; set; }
+    public EnumerableTypeData(ITypeData elementType)
+    {
+        ElementType = elementType;
+    }
+
+    public string Name => $"Enumerable<{ElementType.Name}>";
+    public ITypeData ElementType { get; set; }
     public TypeCategory Category => TypeCategory.Enumerable;
 }
 
 public record EnumTypeData : ITypeData
 {
+    public EnumTypeData(string name, IEnumerable<string> items)
+    {
+        Name = name;
+        Items = items;
+    }
     public string Name { get; set; }
+    public IEnumerable<string> Items { get; set; }
     public TypeCategory Category => TypeCategory.Enum;
 }

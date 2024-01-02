@@ -6,17 +6,24 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
-public record MinMethod() : EnumerationExtensionMethod("Min", new Parameter[]
-    {
-        new("selector",
-            new MethodSignature(new Parameter[]
-                {
-                    new("element", new GenericType("T"))
-                },
-                PrimitiveType.Number))
-    },
-    PrimitiveType.Number)
+public record MinMethod : EnumerationExtensionMethod
 {
+    public MinMethod() : base("Min", 
+        Array.Empty<Parameter>(),
+        PrimitiveType.Number)
+    {
+        MutableParameters = new List<Parameter>
+        {
+            new("selector",
+                new MethodSignature(PrimitiveType.Void,
+                    new Parameter[]
+                    {
+                        new("element", new GenericType("TElement"))
+                    },
+                    PrimitiveType.Number))
+        };
+    }
+
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,
         IEnumerable<IAst> args)

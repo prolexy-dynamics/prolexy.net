@@ -5,7 +5,8 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.DateTimeExtensions;
 
-public record AddDaysMethod() : Method("AddDays", new[] { new Parameter("days", PrimitiveType.Number) },
+public record AddDaysMethod() : Method("AddDays", PrimitiveType.Datetime,
+    new[] { new Parameter("days", PrimitiveType.Number) },
     PrimitiveType.Boolean)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
@@ -21,7 +22,7 @@ public record AddDaysMethod() : Method("AddDays", new[] { new Parameter("days", 
     }
 }
 
-public record NowMethod() : Method("Now", Array.Empty<Parameter>(),
+public record NowMethod() : Method("Now", PrimitiveType.Datetime, Array.Empty<Parameter>(),
     PrimitiveType.Boolean)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,

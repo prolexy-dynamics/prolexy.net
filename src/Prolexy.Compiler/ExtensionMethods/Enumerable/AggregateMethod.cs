@@ -6,16 +6,17 @@ namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
 public record AggregateMethod() : EnumerationExtensionMethod("Aggregate", new Parameter[]
     {
-        new("initialState", new GenericType("TA")),
+        new("initialState", new GenericType("TState")),
         new("aggregator",
-            new MethodSignature(new Parameter[]
+            new MethodSignature(PrimitiveType.Void,
+                new Parameter[]
                 {
-                    new("accumulate", new GenericType("TA")),
-                    new("element", new GenericType("TE"))
+                    new("accumulate", new GenericType("TState")),
+                    new("element", new GenericType("TElement"))
                 },
                 PrimitiveType.Boolean))
     },
-    PrimitiveType.Boolean)
+    new GenericType("TState"))
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,

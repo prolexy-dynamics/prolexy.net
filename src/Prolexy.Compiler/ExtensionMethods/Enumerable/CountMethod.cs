@@ -6,18 +6,23 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
-public record CountMethod() : EnumerationExtensionMethod("Count",
-    new Parameter[]
-    {
-        new("predicate",
-            new MethodSignature(new Parameter[]
-                {
-                    new("element", new GenericType("T"))
-                },
-                PrimitiveType.Boolean))
-    },
-    PrimitiveType.Number)
+public record CountMethod : EnumerationExtensionMethod
 {
+    public CountMethod() : base("Count",
+        new Parameter[0],
+        PrimitiveType.Number)
+    {
+        MutableParameters = new List<Parameter>
+        {
+            new("predicate",
+                new MethodSignature(PrimitiveType.Void, new Parameter[]
+                    {
+                        new("element", new GenericType("TElement"))
+                    },
+                    PrimitiveType.Boolean))
+        };
+    }
+
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,
         IEnumerable<IAst> args)

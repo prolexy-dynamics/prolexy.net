@@ -6,18 +6,24 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
-public record MaxMethod() : EnumerationExtensionMethod("Max",
-    new Parameter[]
-    {
-        new("selector",
-            new MethodSignature(new Parameter[]
-                {
-                    new("element", new GenericType("T"))
-                },
-                PrimitiveType.Number))
-    },
-    PrimitiveType.Number)
+public record MaxMethod : EnumerationExtensionMethod
 {
+    public MaxMethod() : base("Max",
+        new Parameter[0],
+        PrimitiveType.Number)
+    {
+        MutableParameters = new List<Parameter>()
+        {
+            new("selector",
+                new MethodSignature(PrimitiveType.Void,
+                    new Parameter[]
+                    {
+                        new("element", new GenericType("TElement"))
+                    },
+                    PrimitiveType.Number))
+        };
+    }
+
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,
         IEnumerable<IAst> args)

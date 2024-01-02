@@ -5,18 +5,24 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
-public record SingleMethod() : EnumerationExtensionMethod("Single",
-    new Parameter[]
-    {
-        new("predicate",
-            new MethodSignature(new Parameter[]
-                {
-                    new("element", new GenericType("T"))
-                },
-                PrimitiveType.Boolean))
-    },
-    new GenericType("T"))
+public record SingleMethod : EnumerationExtensionMethod
 {
+    public SingleMethod() : base("Single", 
+        Array.Empty<Parameter>(),
+        new GenericType("TElement"))
+    {
+        MutableParameters = new List<Parameter>
+        {
+            new("predicate",
+                new MethodSignature(PrimitiveType.Void,
+                    new Parameter[]
+                    {
+                        new("element", new GenericType("TElement"))
+                    },
+                    PrimitiveType.Boolean))
+        };
+    }
+
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,
         IEnumerable<IAst> args)

@@ -5,7 +5,7 @@ using Prolexy.Compiler.Models;
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
 public abstract record EnumerationExtensionMethod(string Name, IEnumerable<Parameter> Parameters, IType ReturnType) : 
-    Method(Name, Parameters, ReturnType)
+    Method(Name, new EnumerableType(new GenericType("TElement")),Parameters, ReturnType)
 {
     public override bool Accept(object value)
     {

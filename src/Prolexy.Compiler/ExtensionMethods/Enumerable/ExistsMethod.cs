@@ -6,18 +6,23 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.ExtensionMethods.Enumerable;
 
-public record ExistsMethod() : EnumerationExtensionMethod("Exists",
-    new Parameter[]
-    {
-        new("predicate",
-            new MethodSignature(new Parameter[]
-                {
-                    new("element", new GenericType("T"))
-                },
-                PrimitiveType.Boolean))
-    },
-    PrimitiveType.Boolean)
+public record ExistsMethod : EnumerationExtensionMethod
 {
+    public ExistsMethod() : base("Exists",
+        new Parameter[]{},
+        PrimitiveType.Boolean)
+    {
+        MutableParameters = new List<Parameter>
+        {
+            new("predicate",
+                new MethodSignature(PrimitiveType.Void, new Parameter[]
+                    {
+                        new("element", new GenericType("TElement"))
+                    },
+                    PrimitiveType.Boolean))
+        };
+    }
+
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,
         IEnumerable<IAst> args)

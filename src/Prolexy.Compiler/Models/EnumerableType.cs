@@ -5,9 +5,9 @@ namespace Prolexy.Compiler.Models;
 
 public class EnumerableType : IType
 {
-    public IType? ElementType { get; }
+    public IType ElementType { get; }
 
-    public EnumerableType(IType? elementType)
+    public EnumerableType(IType elementType)
     {
         ElementType = elementType;
     }
@@ -21,10 +21,7 @@ public class EnumerableType : IType
 
     public ITypeData GetTypeData(SchemaGenerator generator)
     {
-        return new EnumerableTypeData
-        {
-            Name = Name
-        };
+        return new EnumerableTypeData(ElementType.GetTypeData(generator));
     }
 
     public bool Accept(object value)

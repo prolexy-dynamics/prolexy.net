@@ -4,7 +4,7 @@ using Prolexy.Compiler.SchemaGenerators;
 
 namespace Prolexy.Compiler.Models;
 
-public record Schema(string Name, Property[] Properties, Method[] Methods) : IType
+public record Schema(string Name, Property[] Properties, Method[] Methods, Method[] Constructors) : IType
 {
     public IType? GetPropertyType(string name)
     {
@@ -15,13 +15,13 @@ public record Schema(string Name, Property[] Properties, Method[] Methods) : ITy
     {
         return new ComplexTypeData(Name,
             Properties.Select(p => new PropertyData(p.Name, p.PropertyType.GetTypeData(generator))),
-            Methods.Select(m => new MethodData
-            {
-                Name = m.Name,
-                Parameters = m.Parameters.Select(p =>
+            Methods.Select(m => new MethodData(m.Name,
+                m.ContextType.GetTypeData(generator),
+                m.Parameters.Select(p =>
                     new ParameterData(p.ParameterName, p.ParameterType.GetTypeData(generator))),
-                ReturnTypeData = m.ReturnType.GetTypeData(generator)
-            }));
+                m.ReturnType.GetTypeData(generator)
+            )), 
+            Constructors.Select(c => (MethodData)c.GetTypeData(generator)));
     }
 
     public bool Accept(object value)

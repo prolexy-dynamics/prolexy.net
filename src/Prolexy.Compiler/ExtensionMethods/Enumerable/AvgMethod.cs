@@ -10,9 +10,9 @@ public record AvgMethod() : EnumerationExtensionMethod("Avg",
     new Parameter[]
     {
         new("selector",
-            new MethodSignature(new Parameter[]
+            new MethodSignature(PrimitiveType.Void,new Parameter[]
                 {
-                    new("element", new GenericType("T"))
+                    new("element", new GenericType("TElement"))
                 },
                 PrimitiveType.Number))
     },
