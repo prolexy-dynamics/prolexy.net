@@ -118,9 +118,14 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
     public ClrEvaluatorResult VisitImplicitAccessMember(ImplicitAccessMember implicitAccessMember,
         ClrEvaluatorContext context)
     {
-        if (context.Variables.TryGetValue(implicitAccessMember.Token.Value, out var variable))
-            return new ClrEvaluatorResult(context, variable);
+        foreach (var variables in context.Variables)
+        {
+            if (variables.TryGetValue(implicitAccessMember.Token.Value, out var variable))
+                return new ClrEvaluatorResult(context, variable);
+        }
+
         var property = context.BusinessObject.GetType().GetProperty(implicitAccessMember.Token.Value);
+
         return new ClrEvaluatorResult(context, property?.GetValue(context.BusinessObject));
     }
 
@@ -175,8 +180,8 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
         var contextMethod = CreateInvokerIfClrMethodFound();
         if (contextMethod != null)
             return new ClrEvaluatorResult(context, contextMethod.Invoke());
-        
-        var method = FindMethod(leftValue.Context, leftValue, call);
+
+        var method = FindMethod(leftValue.Context, call.MethodSelector is ImplicitAccessMember, call);
         return leftValue with
         {
             Value = method.Eval(this, context, leftValue.Context.BusinessObject, call.Arguments)
@@ -189,17 +194,17 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
             var args = call.Arguments.Select(arg =>
                 arg.Visit(this, context).Value).ToArray();
             var methodInfo = methodSelector.FindMethod(args);
-            return methodInfo != null 
+            return methodInfo != null
                 ? () => methodInfo.Invoke(leftValue.Context.BusinessObject, args)
                 : null;
         }
     }
 
-    private Method FindMethod(ClrEvaluatorContext context, ClrEvaluatorResult clrEvaluatorResult, Call call)
+    private Method FindMethod(ClrEvaluatorContext context, bool implicitAccessMethod, Call call)
     {
         Method result = null;
         result ??= context.ExtensionMethods
-            .FirstOrDefault(m => m.Accept(context.BusinessObject) &&
+            .FirstOrDefault(m => m.Accept(context.BusinessObject, implicitAccessMethod) &&
                                  m.Name == call.MethodSelector.Token.Value);
 
         return result;

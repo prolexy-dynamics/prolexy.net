@@ -2,6 +2,7 @@ using Newtonsoft.Json.Linq;
 using Prolexy.Compiler.Ast;
 using Prolexy.Compiler.Implementations;
 using Prolexy.Compiler.Models;
+using Prolexy.Compiler.Visitors.TypeDetectorVisitors;
 
 namespace Prolexy.Compiler;
 
@@ -15,6 +16,7 @@ public interface ICompiledSource
 {
     IRuleEvaluator<EvaluatorContext, EvaluatorResult> AsJsonContext();
     IRuleEvaluator<ClrEvaluatorContext, ClrEvaluatorResult> AsClrContext();
+    IRuleEvaluator<ExpressionTypeDetectorContext, TypeDetectorResult> AsExpressionClrReturnTypeEvaluator();
 }
 
 class CompiledSource : ICompiledSource
@@ -35,4 +37,8 @@ class CompiledSource : ICompiledSource
         return new RuleEvaluator<ClrEvaluatorContext, ClrEvaluatorResult>(_ast, new ClrEvaluatorVisitor());
     }
 
+    public IRuleEvaluator<ExpressionTypeDetectorContext, TypeDetectorResult> AsExpressionClrReturnTypeEvaluator()
+    {
+        return new RuleEvaluator<ExpressionTypeDetectorContext, TypeDetectorResult>(_ast, new ClrExpressionTypeDetectorVisitor());
+    }
 }

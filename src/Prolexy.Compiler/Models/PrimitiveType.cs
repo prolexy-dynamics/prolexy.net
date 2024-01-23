@@ -14,6 +14,19 @@ public class PrimitiveType : IType
         Name = name;
     }
 
+    public static Dictionary<string, PrimitiveType> AllPrimitiveTypes { get; }
+    static PrimitiveType()
+    {
+        AllPrimitiveTypes = new Dictionary<string, PrimitiveType>
+        {
+            {Void.Name, Void},
+            {Boolean.Name, Boolean},
+            {Number.Name, Number},
+            {String.Name, String},
+            {Datetime.Name, Datetime},
+            {Enum.Name, Enum},
+        };
+    }
     public static readonly PrimitiveType Void = new("void",
         new object[] { JTokenType.Float, JTokenType.Integer });
     
@@ -46,4 +59,15 @@ public class PrimitiveType : IType
 
     public ITypeData GetTypeData() => new PrimitiveTypeData(Name);
     public ITypeData GetTypeData(SchemaGenerator generator) => new PrimitiveTypeData(Name);
+
+    public Type ToType()
+    {
+        return Name switch 
+        {
+            "number" => typeof(decimal),
+            "string" => typeof(string),
+            "bool" => typeof(bool),
+            "datetime" => typeof(DateTime),
+        };
+    }
 }

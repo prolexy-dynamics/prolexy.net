@@ -36,9 +36,11 @@ public record SingleMethod : EnumerationExtensionMethod
             throw new ArgumentException("Selector is not Anonymous method.");
 
         object result = null;
+        var newScope = new Dictionary<string, object>();
+        context.Variables.Push(newScope);
         foreach (var element in items)
         {
-            context.Variables[predicate.Parameters[0].Value!] = element;
+            newScope[predicate.Parameters[0].Value!] = element;
             var condition = (bool)visitor.Visit(predicate, context).Value;
             if (condition)
             {
@@ -49,7 +51,7 @@ public record SingleMethod : EnumerationExtensionMethod
 
         if (result == null)
             throw new Exception("No any element matched.");
-        context.Variables.Remove(predicate.Parameters[0].Value!);
+        context.Variables.Pop();
         return result;
     }
 }

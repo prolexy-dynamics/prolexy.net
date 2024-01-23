@@ -6,7 +6,7 @@ namespace Prolexy.Compiler.Models;
 
 public interface IEvaluatorContext
 {
-    Dictionary<string, object> Variables { get; }
+    Stack<Dictionary<string, object>>  Variables { get; }
     object BusinessObject { get; init; }
     ImmutableList<Module> Modules { get; init; }
     ImmutableList<Method> ExtensionMethods { get; init; }
@@ -15,7 +15,7 @@ public interface IEvaluatorContext
 public record EvaluatorContext(JToken BusinessObject, IType? Schema, ImmutableList<Module> Modules,
     ImmutableList<Method> ExtensionMethods) : IEvaluatorContext
 {
-    public Dictionary<string, object> Variables { get; } = new();
+    public Stack<Dictionary<string, object>> Variables { get; } = new();
     object IEvaluatorContext.BusinessObject
     {
         get => BusinessObject;
@@ -28,5 +28,5 @@ public record ClrEvaluatorContext(object BusinessObject,
     ImmutableList<Module> Modules,
     ImmutableList<Method> ExtensionMethods) : IEvaluatorContext
 {
-    public Dictionary<string, object> Variables { get; } = new();
+    public Stack<Dictionary<string, object>> Variables { get; } = new();
 }

@@ -37,13 +37,15 @@ public record MaxMethod : EnumerationExtensionMethod
             throw new ArgumentException("Selector is not Anonymous method.");
         var bo = context.BusinessObject ?? JObject.Parse("{}");
         var max = decimal.MinValue;
+        var newScope = new Dictionary<string, object>();
+        context.Variables.Push(newScope);
         foreach (var element in items)
         {
-            context.Variables[predicate.Parameters[0].Value!] = element;
+            newScope[predicate.Parameters[0].Value!] = element;
             max = Math.Max(max, Convert.ToDecimal(visitor.Visit(predicate, context).Value));
         }
 
-        context.Variables.Remove(predicate.Parameters[0].Value!);
+        context.Variables.Pop();
         return max;
     }
 }

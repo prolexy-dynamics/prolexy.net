@@ -4,7 +4,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <Version>0.0.7</Version>
+        <Version>0.0.10</Version>
         <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     </PropertyGroup>
 
@@ -16,7 +16,6 @@
 
     <ItemGroup>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-        <PackageReference Include="Tiba.Domain.Model" Version="0.0.148.5287" />
     </ItemGroup>
 
 </Project>

@@ -16,7 +16,7 @@ public record AddDaysMethod() : Method("AddDays", PrimitiveType.Datetime,
         return Convert.ToDateTime(methodContext).AddDays(days);
     }
 
-    public override bool Accept(object value)
+    public override bool Accept(object value, bool implicitAccessMethod)
     {
         return value is JToken { Type: JTokenType.Date } or DateTime;
     }
@@ -31,8 +31,8 @@ public record NowMethod() : Method("Now", PrimitiveType.Datetime, Array.Empty<Pa
         return DateTime.Now;
     }
 
-    public override bool Accept(object value)
+    public override bool Accept(object value, bool implicitAccessMethod)
     {
-        return true;
+        return implicitAccessMethod;
     }
 }

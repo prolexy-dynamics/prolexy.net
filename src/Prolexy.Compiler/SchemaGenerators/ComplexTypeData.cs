@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.SchemaGenerators;
 

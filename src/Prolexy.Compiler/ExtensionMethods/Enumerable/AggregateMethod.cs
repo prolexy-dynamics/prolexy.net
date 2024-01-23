@@ -14,7 +14,7 @@ public record AggregateMethod() : EnumerationExtensionMethod("Aggregate", new Pa
                     new("accumulate", new GenericType("TState")),
                     new("element", new GenericType("TElement"))
                 },
-                PrimitiveType.Boolean))
+                new GenericType("TState")))
     },
     new GenericType("TState"))
 {
@@ -30,15 +30,16 @@ public record AggregateMethod() : EnumerationExtensionMethod("Aggregate", new Pa
         if (arguments.First() is not AnonymousMethod predicate)
             throw new ArgumentException("Selector is not Anonymous method.");
         var result = visitor.Visit(arguments[1], context).Value;
+        var newScope = new Dictionary<string, object>();
+        context.Variables.Push(newScope);
         foreach (var element in items)
         {
-            context.Variables[predicate.Parameters[0].Value!] = result;
-            context.Variables[predicate.Parameters[1].Value!] = element;
+            newScope[predicate.Parameters[0].Value!] = result;
+            newScope[predicate.Parameters[1].Value!] = element;
             result = visitor.Visit(predicate, context).Value;
         }
 
-        context.Variables.Remove(predicate.Parameters[0].Value!);
-        context.Variables.Remove(predicate.Parameters[1].Value!);
+        context.Variables.Pop();
         return result;
     }
 }

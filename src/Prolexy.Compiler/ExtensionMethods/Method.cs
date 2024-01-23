@@ -57,7 +57,7 @@ public abstract record Method : IMethod
         );
     }
 
-    public abstract bool Accept(object value);
+    public abstract bool Accept(object value, bool implicitAccessMethod);
 
     public virtual bool Equal(Method other)
     {

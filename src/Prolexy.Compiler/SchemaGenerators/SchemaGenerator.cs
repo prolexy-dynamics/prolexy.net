@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Immutable;
 using System.Globalization;
+using System.Reflection;
 using Newtonsoft.Json.Linq;
 using Prolexy.Compiler.ExtensionMethods;
 using Prolexy.Compiler.Models;
@@ -49,32 +50,34 @@ public class SchemaGenerator
             return FromPrimitiveType(type);
         if (type == typeof(string))
             return PrimitiveType.String.GetTypeData(this);
-        if (type == typeof(Decimal))
+        if (type == typeof(Decimal) || type == typeof(Decimal?))
             return PrimitiveType.Number.GetTypeData(this);
-        if (type == typeof(Guid))
+        if (type == typeof(Guid) || type == typeof(Guid?))
             return PrimitiveType.String.GetTypeData(this);
-        if (type == typeof(DateTime))
+        if (type == typeof(DateTime) || type == typeof(DateTime?))
             return PrimitiveType.Datetime.GetTypeData(this);
         if (type == typeof(void))
             return PrimitiveType.Void.GetTypeData(this);
         if (type.IsAssignableTo(typeof(IEnumerable)))
             return new EnumerableTypeData(FromClrType(GetElementType(type)));
-        if (type.IsGenericType &&
-            type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            return new EnumerableTypeData(FromClrType(type.GetGenericArguments()[0]));
+        // if (type.IsGenericType &&
+        //     type.GetGenericTypeDefinition() == typeof(Nullable<>))
+        //     return new GenericTypeData(FromClrType(type.GetGenericArguments()[0]));
+        if (type.IsEnum)
+            return new EnumTypeData(type.Name, Enum.GetValues(type).Cast<Enum>().Select(en => en.ToString()));
         if (type.IsClass || type.IsValueType)
             return FromClassType(type);
-        if (type.IsEnum)
-            return new EnumTypeData(type.Name, Enum.GetValues(type).Cast<string>());
         return null!;
     }
 
     Type GetElementType(Type type)
     {
-        return type.GetInterfaces().First(t =>
-                t.GetGenericArguments().Length == 1 &&
-                t.IsAssignableTo(typeof(IEnumerable<>).MakeGenericType(t.GetGenericArguments()[0])))
-            .GetGenericArguments()[0];
+        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+            ? type.GetGenericArguments()[0]
+            : type.GetInterfaces().First(t =>
+                    t.GetGenericArguments().Length == 1 &&
+                    t.IsAssignableTo(typeof(IEnumerable<>).MakeGenericType(t.GetGenericArguments()[0])))
+                .GetGenericArguments()[0];
     }
 
     ComplexTypeReferenceDataType FromClassType(Type type)
@@ -98,15 +101,34 @@ public class SchemaGenerator
             .Select(c => new MethodData(
                 "ctor",
                 PrimitiveType.Void.GetTypeData(),
-                c.GetParameters().Select((p, idx) => new ParameterData(p.Name ?? $"p{idx}", FromClrType(p.ParameterType))),
-                FromClrType(type)));
+                c.GetParameters().Select((p, idx) =>
+                    new ParameterData(p.Name ?? $"p{idx}", FromClrType(p.ParameterType))).ToList(),
+                FromClrType(type))).ToList()
+            .ToList();
     }
 
     bool IsIgnoredType(Type type) => type.IsAssignableTo(typeof(JToken)) ||
                                      type == typeof(object) ||
-                                     type.IsInterface ||
-                                     type == typeof(CultureInfo) ||
-                                     (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>));
+                                     (type.IsInterface && !type.IsAssignableTo(typeof(IEnumerable))) ||
+                                     (type.Namespace.StartsWith("System") &&
+                                      !(SystemTypeWhiteList.Contains(type) ||
+                                        type.IsAssignableTo(typeof(IEnumerable)) ||
+                                        (type.IsGenericType &&
+                                         type.GetGenericTypeDefinition() == typeof(Nullable<>)))) ||
+                                     (type.IsGenericType && type.GetGenericArguments().Length > 1);
+
+    public List<Type> SystemTypeWhiteList { get; } = new()
+    {
+        typeof(Int16),
+        typeof(Int32),
+        typeof(Int64),
+        typeof(decimal),
+        typeof(string),
+        typeof(Guid),
+        typeof(DateTime),
+        typeof(bool),
+        typeof(void),
+    };
 
     private IEnumerable<MethodData> GenerateMethods(Type type)
     {
@@ -130,7 +152,12 @@ public class SchemaGenerator
             type == typeof(long) ||
             type == typeof(int) ||
             type == typeof(short) ||
-            type == typeof(byte))
+            type == typeof(byte) ||
+            type == typeof(decimal?) ||
+            type == typeof(long?) ||
+            type == typeof(int?) ||
+            type == typeof(short?) ||
+            type == typeof(byte?))
             return PrimitiveType.Number.GetTypeData(this);
 
         if (type.IsAssignableTo(typeof(bool)))

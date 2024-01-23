@@ -112,14 +112,14 @@ public class EvaluatorVisitor : IEvaluatorVisitor<EvaluatorContext, EvaluatorRes
 
         if (result.Value is JObject left)
             return new EvaluatorResult(context with { Schema = context.Schema?.GetPropertyType(accessMember.Token.Value) },
-                GetValue(accessMember.Token.Value!, left, new Dictionary<string, object>()));
+                GetValue(accessMember.Token.Value!, context, left));
         return result.Context.BusinessObject is JObject jObject
             ? result with
             {
                 Context = result.Context with
                 {
                     BusinessObject = jObject.GetValue(accessMember.Token.Value) != null
-                        ? jObject[accessMember.Token.Value]
+                        ? jObject[accessMember.Token.Value]!
                         : JObject.Parse("{}")
                 }
             }
@@ -129,7 +129,12 @@ public class EvaluatorVisitor : IEvaluatorVisitor<EvaluatorContext, EvaluatorRes
     public EvaluatorResult VisitImplicitAccessMember(ImplicitAccessMember implicitAccessMember,
         EvaluatorContext context)
     {
-        var value = GetValue(implicitAccessMember.Token.Value!, context.BusinessObject, context.Variables);
+        foreach (var variables in context.Variables)
+        {
+            if (variables.TryGetValue(implicitAccessMember.Token.Value, out var variable))
+                return new EvaluatorResult(context, (JToken)variable);
+        }    
+        var value = GetValue(implicitAccessMember.Token.Value!, context, context.BusinessObject);
         return new EvaluatorResult(context with
         {
             Schema = context.Schema?.GetPropertyType(implicitAccessMember.Token.Value!),
@@ -137,9 +142,14 @@ public class EvaluatorVisitor : IEvaluatorVisitor<EvaluatorContext, EvaluatorRes
         }, value);
     }
 
-    private static JToken GetValue(string token, JToken context, Dictionary<string, object> contextVariables)
+    private static JToken GetValue(string token,  EvaluatorContext context, JToken businessObject)
     {
-        return contextVariables.TryGetValue(token, out var variable) ? (JToken)variable : context[token]!;
+        foreach (var variables in context.Variables)
+        {
+            if (variables.TryGetValue(token, out var variable))
+                return (JToken)variable;
+        }   
+        return  businessObject[token]!;
     }
 
     public EvaluatorResult VisitLiteral(LiteralPrimitive literalPrimitive, EvaluatorContext context)
@@ -185,18 +195,18 @@ public class EvaluatorVisitor : IEvaluatorVisitor<EvaluatorContext, EvaluatorRes
     public EvaluatorResult VisitMethodCall(Call call, EvaluatorContext context)
     {
         var leftValue = call.MethodSelector.Visit(this, context).Value;
-        var method = FindMethod(context, leftValue, call.MethodSelector.Token.Value);
+        var method = FindMethod(context, leftValue, call.MethodSelector.Token.Value, call.MethodSelector is ImplicitAccessMember);
         var result = (dynamic)method.Eval(this, context, leftValue, call.Arguments);
         return new EvaluatorResult(context, (JToken)result);
     }
 
-    private Method FindMethod(EvaluatorContext context, JToken leftValue, string? methodName)
+    private Method FindMethod(EvaluatorContext context, JToken leftValue, string? methodName, bool implicitAccessMethod)
     {
         Method result = null;
         if (context.Schema is Schema schema)
             result = schema.Methods.FirstOrDefault(m => m.Name == methodName);
         result ??= context.ExtensionMethods
-            .FirstOrDefault(m => m.Accept(leftValue) && m.Name == methodName);
+            .FirstOrDefault(m => m.Accept(leftValue, implicitAccessMethod) && m.Name == methodName);
 
         return result;
     }

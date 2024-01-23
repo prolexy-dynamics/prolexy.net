@@ -26,6 +26,7 @@ public class GenericType : IType
     {
         return new GenericTypeData(Name);
     }
+
 }
 
 public record GenericTypeData(string Name) : ITypeData

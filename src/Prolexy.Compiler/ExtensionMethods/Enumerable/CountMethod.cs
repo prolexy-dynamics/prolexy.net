@@ -35,13 +35,15 @@ public record CountMethod : EnumerationExtensionMethod
         if (arguments.First() is not AnonymousMethod predicate)
             throw new ArgumentException("predicate is not Anonymous method.");
         var count = 0;
+        var newScope = new Dictionary<string, object>();
+        context.Variables.Push(newScope);
         foreach (var element in items)
         {
-            context.Variables[predicate.Parameters[0].Value!] = element;
+            newScope[predicate.Parameters[0].Value!] = element;
 
             if (Convert.ToBoolean(visitor.Visit(predicate, context).Value)) count++;
         }
-        context.Variables.Remove(predicate.Parameters[0].Value!);
+        context.Variables.Pop();
 
         return count;
     }

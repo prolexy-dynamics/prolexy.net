@@ -1,10 +1,8 @@
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Prolexy.Compiler.ExtensionMethods;
 using Prolexy.Compiler.Models;
 using Prolexy.Compiler.SchemaGenerators;
-using Tiba.Domain.Model.Uoms;
 using Tiba.Trading.Domain.Contracts.Models.TradeOrders.Events;
 
 namespace Prolexy.Compiler.Tests.SchemaGenerators;
@@ -181,7 +179,7 @@ public class SchemaGeneratorTests
     {
         //Arrange
         var context = ClrEvaluatorContextBuilder.Default
-            .WithBusinessObject(new SimpleTypeWithMethod())
+            .WithBusinessObject(new TradeOrderUpdated())
             .Build();
 
         //Act

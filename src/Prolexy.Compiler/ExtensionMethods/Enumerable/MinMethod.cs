@@ -37,13 +37,15 @@ public record MinMethod : EnumerationExtensionMethod
             throw new ArgumentException("Selector is not Anonymous method.");
 
         var min = decimal.MaxValue;
+        var newScope = new Dictionary<string, object>();
+        context.Variables.Push(newScope);
         foreach (var element in items)
         {
-            context.Variables[predicate.Parameters[0].Value!] = element;
+            newScope[predicate.Parameters[0].Value!] = element;
             min = Math.Min(min, Convert.ToDecimal(visitor.Visit(predicate, context).Value));
         }
 
-        context.Variables.Remove(predicate.Parameters[0].Value!);
+        context.Variables.Pop();
         return min;
     }
 }
