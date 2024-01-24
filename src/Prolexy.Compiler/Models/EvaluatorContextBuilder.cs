@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Immutable;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
@@ -16,12 +17,15 @@ public record EvaluatorContextBuilder
 
     public EvaluatorContextBuilder WithExtensionMethod(Method method)
     {
-        _extensionMethods = _extensionMethods.Add(method);
-        return this;
+         _extensionMethods = _extensionMethods.Add(method);
+         return this;
     }
 
+    private Hashtable visitedAssembly = new();
     public EvaluatorContextBuilder ScanAssemblyForExtensionMethod(Assembly assembly)
     {
+        if (visitedAssembly.ContainsKey(assembly)) return this;
+        visitedAssembly[assembly] = true;
         foreach (var type in assembly.GetExportedTypes()
                      .Where(t => typeof(Method).IsAssignableFrom(t) && !t.IsAbstract))
         {
@@ -36,6 +40,7 @@ public record EvaluatorContextBuilder
     public JsonEvaluatorContextBuilder AsJsonEvaluatorBuilder() => new(_modules, _extensionMethods);
     public ClrEvaluatorContextBuilder AsClrEvaluatorBuilder() => new(_modules, _extensionMethods);
 }
+
 public record JsonEvaluatorContextBuilder
 {
     private JObject _businessObject = null!;
@@ -48,18 +53,17 @@ public record JsonEvaluatorContextBuilder
         _modules = modules;
         _extensionMethods = extensionMethods;
     }
+
     public JsonEvaluatorContextBuilder WithBusinessObject(JObject businessObject)
     {
-        _businessObject = businessObject;
-        return this;
+        return this with { _businessObject = businessObject };
     }
 
     public JsonEvaluatorContextBuilder WithSchema(Schema schema)
     {
-        _schema = schema;
-        return this;
+        return this with { _schema = schema };
     }
-    
+
     public EvaluatorContext Build() => new(_businessObject, _schema, _modules, _extensionMethods);
 }
 
@@ -67,18 +71,24 @@ public record ClrEvaluatorContextBuilder
 {
     private object _businessObject = null!;
     ImmutableList<ClrType> _clrTypes = ImmutableList<ClrType>.Empty;
-    private readonly ImmutableList<Method> _extensionMethods;
+    private ImmutableList<Method> _extensionMethods;
     private readonly ImmutableList<Module> _modules;
 
-    public ClrEvaluatorContextBuilder( ImmutableList<Module> modules, ImmutableList<Method> extensionMethods)
+    public ClrEvaluatorContextBuilder(ImmutableList<Module> modules, ImmutableList<Method> extensionMethods)
     {
         _modules = modules;
         _extensionMethods = extensionMethods;
     }
-    
+
     public ClrEvaluatorContextBuilder WithBusinessObject(object businessObject)
     {
-        _businessObject = businessObject;
+        return this with { _businessObject = businessObject };
+    }
+
+    public ClrEvaluatorContextBuilder WithExtensionMethod(Method method)
+    {
+        if(_extensionMethods.Find(ext => ext ==method) == null)
+            _extensionMethods = _extensionMethods.Add(method);
         return this;
     }
 
@@ -87,7 +97,9 @@ public record ClrEvaluatorContextBuilder
         _clrTypes = _clrTypes.Add(new ClrType<T>());
         return this;
     }
-    public ExpressionTypeDetectorContextBuilder AsExpressionTypeDetectorContextBuilder() => new(_businessObject, _clrTypes,_extensionMethods, _modules);
+
+    public ExpressionTypeDetectorContextBuilder AsExpressionTypeDetectorContextBuilder() =>
+        new(_businessObject, _clrTypes, _extensionMethods, _modules);
 
     public ClrEvaluatorContext Build() => new(
         _businessObject,

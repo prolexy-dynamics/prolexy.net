@@ -27,9 +27,9 @@ public record AggregateMethod() : EnumerationExtensionMethod("Aggregate", new Pa
         var arguments = args as IAst[] ?? args.ToArray();
         if (!arguments.Any())
             throw new ArgumentException("Selector not provided for 'Aggregate' method");
-        if (arguments.First() is not AnonymousMethod predicate)
+        if (arguments.Skip(1).First() is not AnonymousMethod predicate)
             throw new ArgumentException("Selector is not Anonymous method.");
-        var result = visitor.Visit(arguments[1], context).Value;
+        var result = visitor.Visit(arguments[0], context).Value;
         var newScope = new Dictionary<string, object>();
         context.Variables.Push(newScope);
         foreach (var element in items)

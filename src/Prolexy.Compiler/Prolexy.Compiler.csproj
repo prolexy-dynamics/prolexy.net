@@ -4,7 +4,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <Version>0.0.14</Version>
+        <Version>0.0.18</Version>
         <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     </PropertyGroup>
 

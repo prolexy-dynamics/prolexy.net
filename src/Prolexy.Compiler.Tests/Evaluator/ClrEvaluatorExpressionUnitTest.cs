@@ -219,6 +219,7 @@ public class ClrEvaluatorExpressionUnitTest
                 },
                 { "Cities.Count(def x => x.name is 'Tehran')", new { Cities = new[] { new { name = "Tehran" } } }, 1 },
                 { "Cities.Count(def x => x.name is 'Shiraz')", new { Cities = new[] { new { name = "Tehran" } } }, 0 },
+                { "Cities.Aggregate('Hi:', def s, i => s + ' ' + i.name)", new { Cities = new[] { new { name = "Tehran" }, new { name = "Shiraz" } } }, "Hi: Tehran Shiraz" },
                 { "Grades.Min(def x => x)", new { Grades = Enumerable.Range(0, 6) }, 0 },
                 { "Grades.Max(def x => x)", new { Grades = Enumerable.Range(0, 6) }, 5 },
                 { "Grades.Sum(def x => x)", new { Grades = Enumerable.Range(0, 6) }, 15 },
