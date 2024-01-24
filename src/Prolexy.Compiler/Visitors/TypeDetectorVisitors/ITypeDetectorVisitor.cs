@@ -12,13 +12,14 @@ public interface IExpressionTypeDetectorVisitor : IAstVisitor<ExpressionTypeDete
 }
 
 public record ExpressionTypeDetectorContext(
-        object BusinessObject,
+        Type BusinessObjectType,
         ImmutableList<Module> Modules, 
         ImmutableList<Method> ExtensionMethods,
-        ImmutableList<Type> ClrTypes)
+        ImmutableList<ClrType> ClrTypes)
     : IEvaluatorContext
 {
     public Stack<Dictionary<string, object>> Variables { get; } = new();
+    object IEvaluatorContext.BusinessObject { get; init; }
 }
 
 public record TypeDetectorResult(ExpressionTypeDetectorContext Context, Type? Result) : IEvaluatorResult

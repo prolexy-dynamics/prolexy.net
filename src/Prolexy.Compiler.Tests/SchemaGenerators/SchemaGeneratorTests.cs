@@ -15,7 +15,9 @@ public class SchemaGeneratorTests
     public void Should_generate_schema_from_SimpleType()
     {
         //Arrange
-        var context = ClrEvaluatorContextBuilder.Default
+        var context = EvaluatorContextBuilder
+            .Default
+            .AsClrEvaluatorBuilder()
             .WithBusinessObject(new SimpleType())
             .Build();
 
@@ -51,7 +53,9 @@ public class SchemaGeneratorTests
     public void Should_generate_schema_from_SimpleTypeWithArrayProperty()
     {
         //Arrange
-        var context = ClrEvaluatorContextBuilder.Default
+        var context = EvaluatorContextBuilder
+            .Default
+            .AsClrEvaluatorBuilder()
             .WithBusinessObject(new SimpleTypeWithArray())
             .Build();
 
@@ -84,7 +88,9 @@ public class SchemaGeneratorTests
     public void Should_generate_schema_from_SimpleTypeWithMethod()
     {
         //Arrange
-        var context = ClrEvaluatorContextBuilder.Default
+        var context = EvaluatorContextBuilder
+            .Default
+            .AsClrEvaluatorBuilder()
             .WithBusinessObject(new SimpleTypeWithMethod())
             .Build();
 
@@ -128,7 +134,9 @@ public class SchemaGeneratorTests
     public void Should_generate_schema_from_TypeComposedFromSimpleType()
     {
         //Arrange
-        var context = ClrEvaluatorContextBuilder.Default
+        var context = EvaluatorContextBuilder
+            .Default
+            .AsClrEvaluatorBuilder()
             .WithBusinessObject(new TypeComposedFromSimpleType())
             .Build();
 
@@ -178,7 +186,9 @@ public class SchemaGeneratorTests
     public void Should_generate_schema_from_TibaTradingEvent()
     {
         //Arrange
-        var context = ClrEvaluatorContextBuilder.Default
+        var context = EvaluatorContextBuilder
+            .Default
+            .AsClrEvaluatorBuilder()
             .WithBusinessObject(new TradeOrderUpdated())
             .Build();
 

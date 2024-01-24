@@ -11,22 +11,8 @@ public record EvaluatorContextBuilder
     public static EvaluatorContextBuilder Default => new EvaluatorContextBuilder()
         .ScanAssemblyForExtensionMethod(typeof(AddDaysMethod).Assembly);
 
-    private JObject _businessObject = null!;
-    private Schema _schema = null!;
     ImmutableList<Method> _extensionMethods = ImmutableList<Method>.Empty;
     private readonly ImmutableList<Module> _modules = ImmutableList<Module>.Empty;
-
-    public EvaluatorContextBuilder WithBusinessObject(JObject businessObject)
-    {
-        _businessObject = businessObject;
-        return this;
-    }
-
-    public EvaluatorContextBuilder WithSchema(Schema schema)
-    {
-        _schema = schema;
-        return this;
-    }
 
     public EvaluatorContextBuilder WithExtensionMethod(Method method)
     {
@@ -47,19 +33,49 @@ public record EvaluatorContextBuilder
         return this;
     }
 
+    public JsonEvaluatorContextBuilder AsJsonEvaluatorBuilder() => new(_modules, _extensionMethods);
+    public ClrEvaluatorContextBuilder AsClrEvaluatorBuilder() => new(_modules, _extensionMethods);
+}
+public record JsonEvaluatorContextBuilder
+{
+    private JObject _businessObject = null!;
+    private Schema _schema = null!;
+    private readonly ImmutableList<Module> _modules;
+    private readonly ImmutableList<Method> _extensionMethods;
+
+    internal JsonEvaluatorContextBuilder(ImmutableList<Module> modules, ImmutableList<Method> extensionMethods)
+    {
+        _modules = modules;
+        _extensionMethods = extensionMethods;
+    }
+    public JsonEvaluatorContextBuilder WithBusinessObject(JObject businessObject)
+    {
+        _businessObject = businessObject;
+        return this;
+    }
+
+    public JsonEvaluatorContextBuilder WithSchema(Schema schema)
+    {
+        _schema = schema;
+        return this;
+    }
+    
     public EvaluatorContext Build() => new(_businessObject, _schema, _modules, _extensionMethods);
 }
 
 public record ClrEvaluatorContextBuilder
 {
-    public static ClrEvaluatorContextBuilder Default => new ClrEvaluatorContextBuilder()
-        .ScanAssemblyForExtensionMethod(typeof(AddDaysMethod).Assembly);
-
     private object _businessObject = null!;
     ImmutableList<ClrType> _clrTypes = ImmutableList<ClrType>.Empty;
-    ImmutableList<Method> _extensionMethods = ImmutableList<Method>.Empty;
-    private readonly ImmutableList<Module> _modules = ImmutableList<Module>.Empty;
+    private readonly ImmutableList<Method> _extensionMethods;
+    private readonly ImmutableList<Module> _modules;
 
+    public ClrEvaluatorContextBuilder( ImmutableList<Module> modules, ImmutableList<Method> extensionMethods)
+    {
+        _modules = modules;
+        _extensionMethods = extensionMethods;
+    }
+    
     public ClrEvaluatorContextBuilder WithBusinessObject(object businessObject)
     {
         _businessObject = businessObject;
@@ -71,28 +87,7 @@ public record ClrEvaluatorContextBuilder
         _clrTypes = _clrTypes.Add(new ClrType<T>());
         return this;
     }
-
-    public ClrEvaluatorContextBuilder WithExtensionMethod(Method method)
-    {
-        var old = _extensionMethods.Find(m => m.Name == method.Name);
-        _extensionMethods = old != null
-            ? _extensionMethods.Replace(old, method)
-            : _extensionMethods.Add(method);
-        return this;
-    }
-
-    public ClrEvaluatorContextBuilder ScanAssemblyForExtensionMethod(Assembly assembly)
-    {
-        foreach (var type in assembly.GetExportedTypes()
-                     .Where(t => typeof(Method).IsAssignableFrom(t) && !t.IsAbstract))
-        {
-            if (type.GetConstructors().Any(c => c.GetParameters().Length == 0) &&
-                Activator.CreateInstance(type) is Method method)
-                WithExtensionMethod(method);
-        }
-
-        return this;
-    }
+    public ExpressionTypeDetectorContextBuilder AsExpressionTypeDetectorContextBuilder() => new(_businessObject, _clrTypes,_extensionMethods, _modules);
 
     public ClrEvaluatorContext Build() => new(
         _businessObject,

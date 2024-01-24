@@ -19,11 +19,12 @@ public class Should_can_evaluate_expression_return_type
 
     void WhenIWantEvaluateReturnExpressionOnTheContext(object context)
     {
-        var evalContext = ExpressionTypeDetectorContextBuilder
+        var evalContext = EvaluatorContextBuilder
             .Default
-            .ScanAssemblyForExtensionMethod(typeof(AggregateMethod).Assembly)
-            .WithBusinessObject(context)
+            .AsClrEvaluatorBuilder()
             .AddClrType<MoneyData>()
+            .AsExpressionTypeDetectorContextBuilder()
+            .WithBusinessObjectType(context.GetType())
             .Build();
         var evaluator = _compiler.CompileExpression(_expression).AsExpressionClrReturnTypeEvaluator();
         _result = evaluator.Evaluate(evalContext);

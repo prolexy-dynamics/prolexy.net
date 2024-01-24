@@ -18,7 +18,8 @@ public class Should_can_evaluate_expression_on_Clr_context
 
     void WhenEvaluateCompiledCode(object context)
     {
-        var ctx = ClrEvaluatorContextBuilder.Default
+        var ctx = EvaluatorContextBuilder.Default
+            .AsClrEvaluatorBuilder()
             .WithBusinessObject(context)
             .AddClrType<Person>()
             .Build();

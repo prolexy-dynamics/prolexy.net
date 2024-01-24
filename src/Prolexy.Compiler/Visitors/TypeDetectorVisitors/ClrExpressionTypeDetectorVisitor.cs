@@ -6,12 +6,12 @@ namespace Prolexy.Compiler.Visitors.TypeDetectorVisitors;
 
 public class ClrExpressionTypeDetectorVisitor : IExpressionTypeDetectorVisitor, IEvaluatorVisitor
 {
-    TypeDetectorResult IExpressionTypeDetectorVisitor.Visit(IAst ast, ExpressionTypeDetectorContext context)
+    public TypeDetectorResult Visit(IAst ast, ExpressionTypeDetectorContext context)
     {
         return ast.Visit(this, context);
     }
 
-    public IEvaluatorResult Visit(IAst ast, IEvaluatorContext context)
+    IEvaluatorResult IEvaluatorVisitor.Visit(IAst ast, IEvaluatorContext context)
     {
         return ast.Visit(this, (ExpressionTypeDetectorContext)context);
     }
@@ -96,9 +96,9 @@ public class ClrExpressionTypeDetectorVisitor : IExpressionTypeDetectorVisitor, 
                 return new TypeDetectorResult(context, variable.GetType());
         }
 
-        var property = context.BusinessObject.GetType().GetProperty(implicitAccessMember.Token.Value);
+        var property = context.BusinessObjectType.GetProperty(implicitAccessMember.Token.Value);
 
-        return new TypeDetectorResult(context, property?.PropertyType ?? context.BusinessObject.GetType());
+        return new TypeDetectorResult(context, property?.PropertyType ?? context.BusinessObjectType);
     }
 
     public TypeDetectorResult VisitLiteral(LiteralPrimitive literalPrimitive, ExpressionTypeDetectorContext context)
@@ -179,6 +179,6 @@ public class ClrExpressionTypeDetectorVisitor : IExpressionTypeDetectorVisitor, 
 
     public TypeDetectorResult VisitInstantiation(Instantiation instantiation, ExpressionTypeDetectorContext context)
     {
-        return new(context, context.ClrTypes.Find(t => t.Name == instantiation.Typename.Value));
+        return new(context, context.ClrTypes.Find(t => t.Type.Name == instantiation.Typename.Value)?.Type);
     }
 }

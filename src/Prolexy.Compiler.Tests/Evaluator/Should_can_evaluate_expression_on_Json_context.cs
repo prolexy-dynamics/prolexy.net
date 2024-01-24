@@ -19,6 +19,7 @@ public class Should_can_evaluate_expression_on_Json_context
     void WhenEvaluateCompiledCode(string context)
     {
         var ctx = EvaluatorContextBuilder.Default
+            .AsJsonEvaluatorBuilder()
             .WithSchema(new Schema("Order", 
                 new[] { new Property("OrderDate", PrimitiveType.Datetime) }, 
                 new Method[] { },
