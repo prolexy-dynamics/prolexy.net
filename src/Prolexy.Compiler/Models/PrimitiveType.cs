@@ -66,7 +66,7 @@ public class PrimitiveType : IType
         {
             "number" => typeof(decimal),
             "string" => typeof(string),
-            "bool" => typeof(bool),
+            "boolean" => typeof(bool),
             "datetime" => typeof(DateTime),
         };
     }

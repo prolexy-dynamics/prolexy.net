@@ -11,7 +11,7 @@ public class Lexer
     {
         _tokenDefinitions = new List<TokenDefinition>
         {
-            new(TokenType.Const, "^null", "object`"),
+            new(TokenType.Const, "^null", "object"),
             new(TokenType.Const, "^\\d{4}/\\d{2}/\\d{2}", "datetime"),
             new(TokenType.Const, "^'[^']*'", "string"),
             new(TokenType.Const, "^\"[^\"]*\"", "string"),

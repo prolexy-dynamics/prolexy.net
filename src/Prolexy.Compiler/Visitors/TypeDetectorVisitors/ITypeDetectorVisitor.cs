@@ -18,7 +18,8 @@ public record ExpressionTypeDetectorContext(
         ImmutableList<ClrType> ClrTypes)
     : IEvaluatorContext
 {
-    public Stack<Dictionary<string, object>> Variables { get; } = new();
+    public Stack<Dictionary<string, Type>> Variables { get; } = new();
+    Stack<Dictionary<string, object>> IEvaluatorContext.Variables { get; } = new();
     object IEvaluatorContext.BusinessObject { get; init; }
 }
 

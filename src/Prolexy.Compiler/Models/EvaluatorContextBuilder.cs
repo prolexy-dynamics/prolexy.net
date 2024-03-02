@@ -17,11 +17,12 @@ public record EvaluatorContextBuilder
 
     public EvaluatorContextBuilder WithExtensionMethod(Method method)
     {
-         _extensionMethods = _extensionMethods.Add(method);
-         return this;
+        _extensionMethods = _extensionMethods.Add(method);
+        return this;
     }
 
     private Hashtable visitedAssembly = new();
+
     public EvaluatorContextBuilder ScanAssemblyForExtensionMethod(Assembly assembly)
     {
         if (visitedAssembly.ContainsKey(assembly)) return this;
@@ -87,7 +88,7 @@ public record ClrEvaluatorContextBuilder
 
     public ClrEvaluatorContextBuilder WithExtensionMethod(Method method)
     {
-        if(_extensionMethods.Find(ext => ext ==method) == null)
+        if (_extensionMethods.Find(ext => ext == method) == null)
             _extensionMethods = _extensionMethods.Add(method);
         return this;
     }
@@ -103,6 +104,41 @@ public record ClrEvaluatorContextBuilder
 
     public ClrEvaluatorContext Build() => new(
         _businessObject,
+        _clrTypes,
+        _modules,
+        _extensionMethods);
+
+    public ClrSchemaGeneratorContextBuilder AsSchemaGeneratorContextBuilder()
+    {
+        return new(_businessObject as Type ?? _businessObject.GetType(), _clrTypes, _modules, _extensionMethods);
+    }
+    public ClrSchemaGeneratorContextBuilder AsSchemaGeneratorContextBuilder<T>()
+    {
+        return new(typeof(T), _clrTypes, _modules, _extensionMethods);
+    }
+}
+
+public class ClrSchemaGeneratorContextBuilder
+{
+    private readonly Type _businessObjectType;
+    private ImmutableList<ClrType> _clrTypes;
+    private ImmutableList<Module> _modules;
+    private ImmutableList<Method> _extensionMethods;
+
+    public ClrSchemaGeneratorContextBuilder(
+        Type businessObjectType,
+        ImmutableList<ClrType> clrTypes, 
+        ImmutableList<Module> modules,
+        ImmutableList<Method> extensionMethods)
+    {
+        _businessObjectType = businessObjectType;
+        _clrTypes = clrTypes;
+        _modules = modules;
+        _extensionMethods = extensionMethods;
+    }
+
+    public SchemaGeneratorEvaluatorContext Build() => new(
+        _businessObjectType,
         _clrTypes,
         _modules,
         _extensionMethods);

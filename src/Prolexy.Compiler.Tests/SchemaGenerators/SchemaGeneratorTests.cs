@@ -12,13 +12,51 @@ public class SchemaGeneratorTests
     private SchemaGenerator sut = new SchemaGenerator();
 
     [Fact]
+    public void Should_generate_schema_from_SimpleType2()
+    {
+        //Arrange
+        var context = EvaluatorContextBuilder
+            .Default
+            .AsClrEvaluatorBuilder()
+            .AsSchemaGeneratorContextBuilder<IMakePositionKeepingVoucher>()
+            .Build();
+
+        //Act
+        var schema = sut.Generate(context);
+        var json = JsonConvert.SerializeObject(schema, new JsonSerializerSettings()
+        {
+            ContractResolver = new CamelCasePropertyNamesContractResolver()
+        });
+        //Assert
+        schema.BusinessObjectTypeData.Should()
+            .BeEquivalentTo(new ComplexTypeData(
+                "IMakePositionKeepingVoucher",
+                new[]
+                {
+                    new PropertyData("FromBankAccountCode", PrimitiveType.String.GetTypeData()),
+                    new PropertyData("OperationCode", PrimitiveType.String.GetTypeData()),
+                    new PropertyData("BranchCode", PrimitiveType.String.GetTypeData()),
+                    new PropertyData("Amount", PrimitiveType.Boolean.GetTypeData()),
+                },
+                Array.Empty<MethodData>(),
+                new[]
+                {
+                    new MethodData(
+                        "ctor",
+                        PrimitiveType.Void.GetTypeData(null!),
+                        Array.Empty<ParameterData>(),
+                        new ComplexTypeReferenceDataType("SimpleType"))
+                }));
+    }
+
+    [Fact]
     public void Should_generate_schema_from_SimpleType()
     {
         //Arrange
         var context = EvaluatorContextBuilder
             .Default
             .AsClrEvaluatorBuilder()
-            .WithBusinessObject(new SimpleType())
+            .AsSchemaGeneratorContextBuilder<SimpleType>()
             .Build();
 
         //Act
@@ -56,7 +94,7 @@ public class SchemaGeneratorTests
         var context = EvaluatorContextBuilder
             .Default
             .AsClrEvaluatorBuilder()
-            .WithBusinessObject(new SimpleTypeWithArray())
+            .AsSchemaGeneratorContextBuilder<SimpleTypeWithArray>()
             .Build();
 
         //Act
@@ -91,7 +129,7 @@ public class SchemaGeneratorTests
         var context = EvaluatorContextBuilder
             .Default
             .AsClrEvaluatorBuilder()
-            .WithBusinessObject(new SimpleTypeWithMethod())
+            .AsSchemaGeneratorContextBuilder<SimpleTypeWithMethod>()
             .Build();
 
         //Act
@@ -137,7 +175,7 @@ public class SchemaGeneratorTests
         var context = EvaluatorContextBuilder
             .Default
             .AsClrEvaluatorBuilder()
-            .WithBusinessObject(new TypeComposedFromSimpleType())
+            .AsSchemaGeneratorContextBuilder<TypeComposedFromSimpleType>()
             .Build();
 
         //Act
@@ -189,7 +227,7 @@ public class SchemaGeneratorTests
         var context = EvaluatorContextBuilder
             .Default
             .AsClrEvaluatorBuilder()
-            .WithBusinessObject(new TradeOrderUpdated())
+            .AsSchemaGeneratorContextBuilder<TradeOrderUpdated>()
             .Build();
 
         //Act

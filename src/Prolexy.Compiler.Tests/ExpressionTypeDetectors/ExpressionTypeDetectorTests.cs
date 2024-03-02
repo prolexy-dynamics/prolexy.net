@@ -50,6 +50,21 @@ public class ExpressionTypeDetectorTests
             })
             .BDDfy<ExpressionTypeDetectorTests>();
     }
+    [Fact]
+    public void Should_can_detect_type_of_logical_operation()
+    {
+        var context = new { name = "yasser", age = 40, birthDay = new DateTime(1983, 10, 10), married = true };
+        new Should_can_evaluate_expression_return_type()
+            .WithExamples(new ExampleTable("expression", "context", "expectedType")
+            {
+                { "null", context, typeof(bool?) },
+                { "name == 'Yasser' or name == 'Rasool'", context, typeof(bool) },
+                { "name == 'Yasser' and age == 10", context, typeof(bool) },
+                { "name contains 'Yasser' and age == 10", context, typeof(bool) },
+                { "name starts with 'Yasser' and age == 10", context, typeof(bool) },
+            })
+            .BDDfy<ExpressionTypeDetectorTests>();
+    }
 
     [Fact]
     public void Should_can_detect_type_of_inner_access_member()
@@ -144,6 +159,12 @@ public class ExpressionTypeDetectorTests
             {
                 { "name is ''", context, typeof(bool) },
                 { "name is not ''", context, typeof(bool) },
+
+                { "name contains ''", context, typeof(bool) },
+                { "name starts with ''", context, typeof(bool) },
+                { "name not starts with ''", context, typeof(bool) },
+                { "name ends with ''", context, typeof(bool) },
+                { "name not ends with ''", context, typeof(bool) },
 
                 { "name + ' Abbasi'", context, typeof(string) },
                 { "10 + ' Abbasi'", context, typeof(string) },

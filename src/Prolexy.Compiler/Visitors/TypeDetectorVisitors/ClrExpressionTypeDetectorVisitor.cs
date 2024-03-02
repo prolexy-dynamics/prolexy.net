@@ -21,6 +21,8 @@ public class ClrExpressionTypeDetectorVisitor : IExpressionTypeDetectorVisitor, 
         var left = binary.Left.Visit(this, context);
         var right = binary.Right.Visit(this, context);
         var result = new TypeDetectorResult(context, typeof(void));
+        if (Operations.LogicalOperations.Contains(binary.Operation))
+            return result with { Result = typeof(bool) };
         if (isNumeric(left.Result))
             return NumericTypeDetectorResult();
         if (left.Result?.IsAssignableTo(typeof(string)) ?? false)
@@ -93,7 +95,7 @@ public class ClrExpressionTypeDetectorVisitor : IExpressionTypeDetectorVisitor, 
         foreach (var variables in context.Variables)
         {
             if (variables.TryGetValue(implicitAccessMember.Token.Value, out var variable))
-                return new TypeDetectorResult(context, variable.GetType());
+                return new TypeDetectorResult(context, variable);
         }
 
         var property = context.BusinessObjectType.GetProperty(implicitAccessMember.Token.Value);
@@ -109,6 +111,7 @@ public class ClrExpressionTypeDetectorVisitor : IExpressionTypeDetectorVisitor, 
             "datetime" => typeof(DateTime),
             "boolean" => typeof(bool),
             "number" => typeof(decimal),
+            "object" => typeof(Nullable)
         });
     }
 

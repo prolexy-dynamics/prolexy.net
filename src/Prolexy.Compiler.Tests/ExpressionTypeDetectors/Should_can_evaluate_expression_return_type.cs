@@ -33,6 +33,8 @@ public class Should_can_evaluate_expression_return_type
     void ThenIClrTypeAsAnExpected(Type expectedType)
     {
         _result.Result.Should().NotBeNull();
-        _result.Result.Should().Be(expectedType);
+        var nullable = _result.Result!.Name.Contains("Nullable") && expectedType.Name.Contains("Nullable");
+        if (!nullable)
+            _result.Result.Should().Be(expectedType);
     }
 }

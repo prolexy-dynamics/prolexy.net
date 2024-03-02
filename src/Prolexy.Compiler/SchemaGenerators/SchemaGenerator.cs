@@ -13,9 +13,9 @@ public class SchemaGenerator
     private Dictionary<Type, ComplexTypeReferenceDataType> _visited = new();
     public ImmutableArray<ComplexTypeData> ComplexTypes { get; private set; } = ImmutableArray<ComplexTypeData>.Empty;
 
-    public ContextSchema Generate(IEvaluatorContext context)
+    public ContextSchema Generate(SchemaGeneratorEvaluatorContext context)
     {
-        var type = context.BusinessObject.GetType();
+        var type = context.BusinessObjectType;
         var referenceDataType = FromClassType(type);
         return new ContextSchema
         {
