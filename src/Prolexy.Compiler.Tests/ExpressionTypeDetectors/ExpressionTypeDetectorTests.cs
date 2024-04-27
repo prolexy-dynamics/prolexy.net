@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using Prolexy.Compiler.Tests.ParserTests;
 using TestStack.BDDfy;
 using Tiba.Domain.Model.Uoms;
@@ -47,6 +48,18 @@ public class ExpressionTypeDetectorTests
                 { "married", context, typeof(bool) },
                 { "age", context, typeof(int) },
                 { "birthDay", context, typeof(DateTime) },
+            })
+            .BDDfy<ExpressionTypeDetectorTests>();
+    }
+
+    [Fact]
+    public void Should_can_detect_type_of_access_member_to_jobject()
+    {
+        var context = new { data = new JObject(){["name"]= "martin"} };
+        new Should_can_evaluate_expression_return_type()
+            .WithExamples(new ExampleTable("expression", "context", "expectedType")
+            {
+                { "data.name", context, typeof(JObject) },
             })
             .BDDfy<ExpressionTypeDetectorTests>();
     }

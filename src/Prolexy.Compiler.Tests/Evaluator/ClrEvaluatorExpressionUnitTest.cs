@@ -1,4 +1,6 @@
+using System.Globalization;
 using FluentAssertions.Extensions;
+using Newtonsoft.Json.Linq;
 using TestStack.BDDfy;
 
 namespace Prolexy.Compiler.Tests.Evaluator;
@@ -204,6 +206,8 @@ public class ClrEvaluatorExpressionUnitTest
         new Should_can_evaluate_expression_on_Clr_context()
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
+                { "'Code,Name'.SplitBy(',').Exists(def a => a is 'Code')", new { BranchCode = "12345" }, true },
+                { "'18-' + BranchCode + '-' + Now().Format('yyyyMMdd')", new { BranchCode = "12345" }, $"18-12345-{DateTime.Now.ToString("yyyyMMdd", new CultureInfo("fa"))}"},
                 {
                     "OrderDate.AddDays(1)", new MyBusinessObject { OrderDate = new(2020, 10, 12) },
                     DateTime.Parse("2020-10-13")
@@ -241,6 +245,19 @@ public class ClrEvaluatorExpressionUnitTest
             })
             .BDDfy<JsonEvaluatorExpressionUnitTest>();
     }
+
+    [Fact]
+    public void Should_can_evaluate_expression_on_jobject()
+    {
+        new Should_can_evaluate_expression_on_Clr_context()
+            .WithExamples(new ExampleTable("expression", "context", "expected")
+            {
+                { "AdditionalData.brotherName", new MyBusinessObject(), "Alex" },
+                { "AdditionalData.father.name", new MyBusinessObject(), "Joe" },
+                { "AdditionalData.father.incomes.Sum(def x => x)", new MyBusinessObject(), 30 },
+            })
+            .BDDfy<JsonEvaluatorExpressionUnitTest>();
+    }
 }
 
 public class MyBusinessObject
@@ -256,4 +273,13 @@ public class MyBusinessObject
     public int DiscountPercentage { get; set; }
     public Array LineItems { get; set; }
     public int DamageUnUseHistory { get; set; }
+    public JObject AdditionalData { get; set; } = new()
+    {
+        ["brotherName"] = "Alex",
+        ["father"] = new JObject()
+        {
+            ["name"] = "Joe",
+            ["incomes"] = new JArray(){10, 20}
+        } 
+    };
 }
