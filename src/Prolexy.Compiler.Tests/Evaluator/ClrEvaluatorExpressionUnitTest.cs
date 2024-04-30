@@ -206,6 +206,8 @@ public class ClrEvaluatorExpressionUnitTest
         new Should_can_evaluate_expression_on_Clr_context()
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
+                { "Eval('AdditionalData.brotherName')", new MyBusinessObject(), "Alex" },
+                { "Eval('AdditionalData.father.incomes.Sum(def x => x)')", new MyBusinessObject(), 30 },
                 { "'Code,Name'.SplitBy(',').Exists(def a => a is 'Code')", new { BranchCode = "12345" }, true },
                 { "'18-' + BranchCode + '-' + Now().Format('yyyyMMdd')", new { BranchCode = "12345" }, $"18-12345-{DateTime.Now.ToString("yyyyMMdd", new CultureInfo("fa"))}"},
                 {

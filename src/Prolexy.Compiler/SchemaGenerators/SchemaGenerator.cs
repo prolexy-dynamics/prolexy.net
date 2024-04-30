@@ -43,7 +43,6 @@ public class SchemaGenerator
             .ToArray();
     }
 
-
     public ITypeData FromClrType(Type type)
     {
         if (type.IsPrimitive)
