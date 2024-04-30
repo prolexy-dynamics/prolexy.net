@@ -36,17 +36,15 @@ public class SchemaGeneratorTests
                     new PropertyData("FromBankAccountCode", PrimitiveType.String.GetTypeData()),
                     new PropertyData("OperationCode", PrimitiveType.String.GetTypeData()),
                     new PropertyData("BranchCode", PrimitiveType.String.GetTypeData()),
-                    new PropertyData("Amount", PrimitiveType.Boolean.GetTypeData()),
+                    new PropertyData("Amount", new ComplexTypeReferenceDataType("MoneyData")),
+                    new PropertyData("FcAmount", new ComplexTypeReferenceDataType("MoneyData")),
+                    new PropertyData("EqFcAmount", new ComplexTypeReferenceDataType("MoneyData")),
+                    new PropertyData("ExchangeRate", PrimitiveType.Number.GetTypeData()),
+                    new PropertyData("EqExchangeRate", PrimitiveType.Number.GetTypeData()),
+                    new PropertyData("TotalAmount", new ComplexTypeReferenceDataType("MoneyData")),
                 },
                 Array.Empty<MethodData>(),
-                new[]
-                {
-                    new MethodData(
-                        "ctor",
-                        PrimitiveType.Void.GetTypeData(null!),
-                        Array.Empty<ParameterData>(),
-                        new ComplexTypeReferenceDataType("SimpleType"))
-                }));
+                Array.Empty<MethodData>()));
     }
 
     [Fact]

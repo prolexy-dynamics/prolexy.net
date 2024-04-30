@@ -158,7 +158,7 @@ public class ClrExpressionTypeDetectorVisitor : IExpressionTypeDetectorVisitor, 
             foreach (var argument in call.Arguments)
             {
                 var x = argument.Visit(this, context);
-                if (extMethod.Parameters.Skip(index).First().ParameterType is GenericType pType)
+                if (extMethod.Parameters.Skip(index++).First().ParameterType is GenericType pType)
                     generics.TryAdd(pType.Name, x.Result!);
             }
 

@@ -105,6 +105,7 @@ public class ExpressionTypeDetectorTests
         new Should_can_evaluate_expression_return_type()
             .WithExamples(new ExampleTable("expression", "context", "expectedType")
             {
+                { "'18-' + BankBranchCode + '-' + Now().Format('yyyyMMdd')", context, typeof(string) },
                 { "Method1()", context, typeof(Int32) },
                 { "Method2()", context, typeof(string) },
                 { "Method1(1)", context, typeof(string) },
@@ -125,6 +126,9 @@ public class ExpressionTypeDetectorTests
                 { "Grades.Aggregate(new MoneyData(), def x, y => x + y)", context, typeof(MoneyData) },
                 { "Grades.Single(def x => x > 10)", context, typeof(Int32) },
                 { "Grades.First()", context, typeof(Int32) },
+                { "Iff(Grades.Sum(def x => x) > 15, 'yes', 'no')", context, typeof(string) },
+                { "Iff(Grades.Sum(def x => x) > 15, 'yes', 10)", context, typeof(string) },
+                { "Iff(Grades.Sum(def x => x) > 15, 20, 10)", context, typeof(decimal) },
             })
             .BDDfy<ExpressionTypeDetectorTests>();
     }
@@ -206,6 +210,7 @@ public class ExpressionTypeDetectorTests
 public class Person
 {
     public int[] Grades { get; set; }
+    public string BankBranchCode { get; set; }
     public int Method1() => 1;
     public string Method2() => "1";
     public string Method1(int input) => "1";

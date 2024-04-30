@@ -241,7 +241,9 @@ public class ClrEvaluatorExpressionUnitTest
                         }
                     },
                     true
-                }
+                },
+                { "Iff(Grades.Sum(def x => x) > 10, 'yes', 'no')", new { Grades = Enumerable.Range(0, 6) }, "yes" },
+                { "Iff(Grades.Sum(def x => x) > 15, 'yes', 'no')", new { Grades = Enumerable.Range(0, 6) }, "no" },
             })
             .BDDfy<JsonEvaluatorExpressionUnitTest>();
     }
@@ -252,6 +254,10 @@ public class ClrEvaluatorExpressionUnitTest
         new Should_can_evaluate_expression_on_Clr_context()
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
+                { "AdditionalData.brotherName.SplitBy('l').Length", new MyBusinessObject { }, 2 },
+                { "AdditionalData.brotherName is 'yasser'", new MyBusinessObject { }, false },
+                { "'Alex' is AdditionalData.brotherName", new MyBusinessObject { }, true },
+                { "new Person(AdditionalData.brotherName).Name", new MyBusinessObject { }, "Alex" },
                 { "AdditionalData.brotherName", new MyBusinessObject(), "Alex" },
                 { "AdditionalData.father.name", new MyBusinessObject(), "Joe" },
                 { "AdditionalData.father.incomes.Sum(def x => x)", new MyBusinessObject(), 30 },

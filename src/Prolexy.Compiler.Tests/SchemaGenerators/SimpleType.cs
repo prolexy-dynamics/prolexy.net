@@ -34,14 +34,5 @@ public interface IMakePositionKeepingVoucher
     public double ExchangeRate { get; set; }
     public double EqExchangeRate { get; set; }
     public MoneyData TotalAmount { get; set; }
-    public AdditionalData Data { get; set; }
-    public class AdditionalData
-    {
-        public string ImportRegNo { get; set; }
-        public string ReferenceNumber { get; set; }
-        public string PartyName { get; set; }
-        public string EqExchangeRateTitle { get; set; }
-        public string ExchangeRateTitle { get; set; }
-        public string Reason { get; set; }
-    }
+   
 }

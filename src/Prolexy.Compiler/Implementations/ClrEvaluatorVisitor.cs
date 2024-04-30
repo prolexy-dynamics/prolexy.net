@@ -25,6 +25,8 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
         var left = binary.Left.Visit(this, context).Value;
         var right = binary.Right.Visit(this, context).Value;
         if (left != null) right = Convert.ChangeType(right, left.GetType());
+        else if (right != null) left = Convert.ChangeType(left, right.GetType());
+        
         var comparable = left as IComparable;
         switch (binary.Operation)
         {
@@ -109,7 +111,8 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
     {
         var result = accessMember.Left.Visit(this, context).Value;
         if (result is JObject jObject)
-            return new ClrEvaluatorResult(context with { BusinessObject = result }, jObject[accessMember.Token.Value]);
+            return new ClrEvaluatorResult(context with { BusinessObject = result },
+                jObject[accessMember.Token.Value] is JValue jValue ? jValue.Value : jObject[accessMember.Token.Value]);
         var property = result.GetType().GetProperty(accessMember.Token.Value);
         if (property != null)
             return new ClrEvaluatorResult(context with { BusinessObject = result }, property.GetValue(result));
@@ -239,8 +242,10 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
                                          .All(a => a));
         constructorInfo ??= typeToInstantiate.Type.GetConstructors()
             .FirstOrDefault(ctor => ctor.GetParameters().Length == instantiation.Arguments.Count &&
-                                     args.Select((a, i) => a == null || ctor.GetParameters()[i].ParameterType.IsInstanceOfType(a))
-                .All(a => a));
+                                    args.Select((a, i) =>
+                                            a == null || ctor.GetParameters()[i].ParameterType
+                                                .IsInstanceOfType(a))
+                                        .All(a => a));
         if (constructorInfo == null)
             throw new ArgumentException($"constructor of type {typeToInstantiate.Name} parameters mismatched.");
         var result = constructorInfo.Invoke(constructorInfo

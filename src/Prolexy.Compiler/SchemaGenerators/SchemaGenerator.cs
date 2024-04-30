@@ -123,6 +123,8 @@ public class SchemaGenerator
         typeof(Int32),
         typeof(Int64),
         typeof(decimal),
+        typeof(double),
+        typeof(float),
         typeof(string),
         typeof(Guid),
         typeof(DateTime),
@@ -153,10 +155,14 @@ public class SchemaGenerator
             type == typeof(int) ||
             type == typeof(short) ||
             type == typeof(byte) ||
+            type == typeof(double) ||
+            type == typeof(float) ||
             type == typeof(decimal?) ||
             type == typeof(long?) ||
             type == typeof(int?) ||
             type == typeof(short?) ||
+            type == typeof(double?) ||
+            type == typeof(float?) ||
             type == typeof(byte?))
             return PrimitiveType.Number.GetTypeData(this);
 
