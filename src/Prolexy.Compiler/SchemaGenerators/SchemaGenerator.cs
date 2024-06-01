@@ -32,14 +32,18 @@ public class SchemaGenerator
             m.Parameters
                 .Select(p => new ParameterData(p.ParameterName, p.ParameterType.GetTypeData(this)))
                 .ToList(),
-            m.ReturnType.GetTypeData(this)));
+            m.ReturnType.GetTypeData(this)))
+            .ToList();
     }
 
     private PropertyData[] GenerateProperties(Type type)
     {
         return type.GetProperties()
             .Where(p => !IsIgnoredType(p.PropertyType))
-            .Select(p => new PropertyData(p.Name, FromClrType(p.PropertyType)))
+            .Select(p =>
+                p.GetCustomAttribute<DataSourceAttribute>() is { } attr
+                    ? new PropertyData(p.Name, FromClrType(attr.TargetType))
+                    : new PropertyData(p.Name, FromClrType(p.PropertyType)))
             .ToArray();
     }
 
@@ -151,7 +155,9 @@ public class SchemaGenerator
     {
         if (type == typeof(decimal) ||
             type == typeof(long) ||
+            type == typeof(ulong) ||
             type == typeof(int) ||
+            type == typeof(uint) ||
             type == typeof(short) ||
             type == typeof(byte) ||
             type == typeof(double) ||
@@ -168,6 +174,16 @@ public class SchemaGenerator
         if (type.IsAssignableTo(typeof(bool)))
             return PrimitiveType.Boolean.GetTypeData(this);
         throw new Exception("prolexy type not found exception.");
+    }
+}
+
+public class DataSourceAttribute : Attribute
+{
+    public Type TargetType { get; }
+
+    public DataSourceAttribute(Type targetType)
+    {
+        TargetType = targetType;
     }
 }
 

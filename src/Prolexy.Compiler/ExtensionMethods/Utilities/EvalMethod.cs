@@ -9,7 +9,7 @@ public record EvalMethod() : Method("Eval", PrimitiveType.Void, new[]
     {
         new Parameter("script", PrimitiveType.String)
     },
-    new ClrType<JObject>())
+    Dynamic.Instance)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context, object methodContext,
         IEnumerable<IAst> args)

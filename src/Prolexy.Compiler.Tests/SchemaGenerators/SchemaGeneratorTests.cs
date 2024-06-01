@@ -12,6 +12,22 @@ public class SchemaGeneratorTests
     private SchemaGenerator sut = new SchemaGenerator();
 
     [Fact]
+    public void Should_generate_schema_from_PrimitiveTypes()
+    {
+        //Arrange
+        var context = EvaluatorContextBuilder
+            .Default
+            .AsClrEvaluatorBuilder()
+            .AsSchemaGeneratorContextBuilder<decimal>()
+            .Build();
+
+        //Act
+        var schema = sut.Generate(context);
+
+        //Assert
+        schema.BusinessObjectTypeData.Properties.Should().BeEmpty();
+    }
+    [Fact]
     public void Should_generate_schema_from_SimpleType2()
     {
         //Arrange

@@ -24,8 +24,7 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
 
         var left = binary.Left.Visit(this, context).Value;
         var right = binary.Right.Visit(this, context).Value;
-        if (left != null) right = Convert.ChangeType(right, left.GetType());
-        else if (right != null) left = Convert.ChangeType(left, right.GetType());
+        if (left != null && right != null) right = Convert.ChangeType(right, left.GetType());
         
         var comparable = left as IComparable;
         switch (binary.Operation)

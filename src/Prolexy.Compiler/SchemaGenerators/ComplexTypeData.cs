@@ -34,9 +34,15 @@ public enum TypeCategory
     Method,
     Enumerable,
     Generic,
-    ReferenceType
+    ReferenceType,
+    Dynamic
 }
 
+public record DynamicTypeData : ITypeData
+{
+    public string Name { get; } = "Dynamic";
+    public TypeCategory Category { get; } = TypeCategory.Dynamic;
+}
 public record ComplexTypeData : ITypeData 
 {
     public ComplexTypeData(string Name,

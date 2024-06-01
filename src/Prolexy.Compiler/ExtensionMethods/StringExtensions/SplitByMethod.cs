@@ -9,7 +9,7 @@ public record SplitByMethod() : StringExtensionMethod("SplitBy",
     {
         new("text", PrimitiveType.String)
     },
-    PrimitiveType.String)
+    new EnumerableType(PrimitiveType.String))
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,
