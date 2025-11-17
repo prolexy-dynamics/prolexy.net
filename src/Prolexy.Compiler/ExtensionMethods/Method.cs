@@ -35,6 +35,11 @@ public abstract record Method : IMethod
         );
     }
 
+    public Type? ToClrType()
+    {
+        return ReturnType.ToClrType();
+    }
+
     public abstract bool Accept(object value, bool implicitAccessMethod);
 
     public virtual bool Equal(Method other)

@@ -8,6 +8,7 @@ public interface IType
     string Name { get; }
     IType? GetPropertyType(string name);
     ITypeData GetTypeData(SchemaGenerator generator);
+    Type? ToClrType();
 }
 
 public class GenericType : IType
@@ -27,6 +28,10 @@ public class GenericType : IType
         return new GenericTypeData(Name);
     }
 
+    public Type? ToClrType()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public record GenericTypeData(string Name) : ITypeData
@@ -54,6 +59,11 @@ public class ClrType : IType
     public ITypeData GetTypeData(SchemaGenerator generator)
     {
         return new SchemaGenerator().FromClrType(_type);
+    }
+
+    public Type? ToClrType()
+    {
+        return _type;
     }
 }
 

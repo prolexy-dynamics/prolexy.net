@@ -25,7 +25,7 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
         var left = binary.Left.Visit(this, context).Value;
         var right = binary.Right.Visit(this, context).Value;
         if (left != null && right != null) right = Convert.ChangeType(right, left.GetType());
-        
+
         var comparable = left as IComparable;
         switch (binary.Operation)
         {
@@ -70,9 +70,9 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
                 return EvaluatorResult((dynamic)left % (dynamic)right);
 
             case Operations.Or:
-                return EvaluatorResult((bool)left || (bool)right);
+                return EvaluatorResult(((bool?)left == true) || ((bool?)right == true));
             case Operations.And:
-                return EvaluatorResult((bool)left && (bool)right);
+                return EvaluatorResult(((bool?)left == true) && ((bool?)right == true));
         }
 
         throw new NotImplementedException();
@@ -129,8 +129,12 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
         }
 
         var property = context.BusinessObject.GetType().GetProperty(implicitAccessMember.Token.Value);
-
-        return new ClrEvaluatorResult(context, property?.GetValue(context.BusinessObject));
+        if (property != null)
+            return new ClrEvaluatorResult(context, property?.GetValue(context.BusinessObject));
+        if (context.BusinessObject?.GetType().GetMethods().Any(m => m.Name == implicitAccessMember.Token.Value) == true)
+            return new ClrEvaluatorResult(context,
+                new MethodSelector(context.BusinessObject, implicitAccessMember.Token.Value));
+        return new ClrEvaluatorResult(context, null);
     }
 
     public ClrEvaluatorResult VisitLiteral(LiteralPrimitive literalPrimitive, ClrEvaluatorContext context)

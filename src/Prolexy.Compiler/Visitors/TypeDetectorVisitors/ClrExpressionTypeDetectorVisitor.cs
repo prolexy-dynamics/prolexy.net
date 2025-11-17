@@ -143,7 +143,7 @@ public class ClrExpressionTypeDetectorVisitor : IExpressionTypeDetectorVisitor, 
 
         var extMethod = context.ExtensionMethods.SingleOrDefault(m => m.Name == call.MethodSelector.Token.Value);
         if (extMethod?.ReturnType is PrimitiveType primitive)
-            return left with { Result = primitive.ToType() };
+            return left with { Result = primitive.ToClrType() };
         if (extMethod?.ReturnType is ClrType clrType)
             return left with { Result = clrType.Type };
         if (extMethod?.ReturnType is GenericType generic)
@@ -166,7 +166,7 @@ public class ClrExpressionTypeDetectorVisitor : IExpressionTypeDetectorVisitor, 
                 return left with { Result = generics[generic.Name] };
         }
 
-        return null;
+        return left with{ Result = extMethod.ReturnType.ToClrType()};
     }
 
     public TypeDetectorResult VisitPriority(Priority priority, ExpressionTypeDetectorContext context)

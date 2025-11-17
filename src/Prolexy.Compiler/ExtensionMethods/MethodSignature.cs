@@ -21,6 +21,11 @@ public record MethodSignature(IType ContextType, IEnumerable<Parameter> Paramete
         );
     }
 
+    public Type? ToClrType()
+    {
+        return ReturnType.ToClrType();
+    }
+
     public object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context, object methodContext, IEnumerable<IAst> args)
     {
         return null;

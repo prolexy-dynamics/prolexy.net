@@ -53,6 +53,8 @@ public class ClrEvaluatorExpressionUnitTest
         new Should_can_evaluate_expression_on_Clr_context()
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
+                { "true and AdditionalData.ControlRecord", 
+                    new MyBusinessObject { AdditionalData = new JObject()}, false },
                 { "new Person('yasser').Name", new {  }, "yasser" },
 
                 { "name is null", new MyBusinessObject { }, true },
@@ -214,7 +216,7 @@ public class ClrEvaluatorExpressionUnitTest
                     "OrderDate.AddDays(1)", new MyBusinessObject { OrderDate = new(2020, 10, 12) },
                     DateTime.Parse("2020-10-13")
                 },
-                { $"Now() after or equal to {DateTime.Now:yyyy/MM/dd}", new MyBusinessObject(), true },
+                { $"Now() after or equal to {DateTime.Now:yyyy'/'MM'/'dd}", new MyBusinessObject(), true },
                 {
                     "Cities.Exists(def x => x.name is 'Tehran')", new { Cities = new[] { new { name = "Tehran" } } },
                     true

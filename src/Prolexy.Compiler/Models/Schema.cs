@@ -21,6 +21,11 @@ public record Dynamic : IType
     {
         return new DynamicTypeData();
     }
+
+    public Type? ToClrType()
+    {
+        return typeof(JObject);
+    }
 }
 public record Schema(string Name, Property[] Properties, Method[] Methods, Method[] Constructors) : IType
 {
@@ -45,5 +50,9 @@ public record Schema(string Name, Property[] Properties, Method[] Methods, Metho
     public bool Accept(object value)
     {
         return false;
+    }
+    public Type? ToClrType()
+    {
+        return typeof(JObject);
     }
 }

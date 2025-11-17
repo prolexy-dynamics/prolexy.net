@@ -24,6 +24,11 @@ public class EnumerableType : IType
         return new EnumerableTypeData(ElementType.GetTypeData(generator));
     }
 
+    public Type? ToClrType()
+    {
+        return typeof(IEnumerable<>).MakeGenericType(ElementType.ToClrType());
+    }
+
     public bool Accept(object value)
     {
         return value is JArray;

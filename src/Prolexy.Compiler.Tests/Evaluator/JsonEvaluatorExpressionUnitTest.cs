@@ -170,7 +170,7 @@ public class JsonEvaluatorExpressionUnitTest
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
                 { "OrderDate.AddDays(1)", "{OrderDate: '2020-10-12T00:00:00z'}", DateTime.Parse("2020-10-13") },
-                { $"Now() after or equal to {DateTime.Now:yyyy/MM/dd}", "{}", true },
+                { $"Now() after or equal to {DateTime.Now:yyyy'/'MM'/'dd}", "{}", true },
                 // { "personCities.GroupBy(def x => x.city, def x => x.person).Tehran.Count(def x => true)", 
                 //     "{personCities: [{city: 'Tehran', person: 'ali'}]}",
                 //     1 },

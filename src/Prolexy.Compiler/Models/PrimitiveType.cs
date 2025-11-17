@@ -60,7 +60,7 @@ public class PrimitiveType : IType
     public ITypeData GetTypeData() => new PrimitiveTypeData(Name);
     public ITypeData GetTypeData(SchemaGenerator generator) => new PrimitiveTypeData(Name);
 
-    public Type ToType()
+    public Type ToClrType()
     {
         return Name switch 
         {

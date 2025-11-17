@@ -13,7 +13,7 @@ public class Should_can_evaluate_expression_on_Json_context
     void GivenICompileInput(string expression)
     {
         var compiler = new Implementations.Compiler();
-        _evaluator = compiler.CompileExpression(expression).AsJsonContext();
+        _evaluator = compiler.CompileExpression(expression).AsJsonEvaluator();
     }
 
     void WhenEvaluateCompiledCode(string context)

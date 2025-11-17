@@ -12,7 +12,7 @@ public class Should_can_execute
 
     void GivenIExecuteExpression(string rule, string context)
     {
-        var evaluator = _compiler.Compile(rule).AsJsonContext();
+        var evaluator = _compiler.Compile(rule).AsJsonEvaluator();
         _evalContext = EvaluatorContextBuilder.Default
             .AsJsonEvaluatorBuilder()
             .WithBusinessObject(JObject.Parse(context))
@@ -22,7 +22,7 @@ public class Should_can_execute
 
     void WhenIEvaluateExpression(string trueExpression)
     {
-        var result = _compiler.CompileExpression(trueExpression).AsJsonContext().Evaluate(_evalContext!)?.Value;
+        var result = _compiler.CompileExpression(trueExpression).AsJsonEvaluator().Evaluate(_evalContext!)?.Value;
         _result = (bool?)result;
     }
 
@@ -40,7 +40,7 @@ public class Should_can_execute_on_clr_context
 
     void GivenIExecuteExpression(string rule, object context)
     {
-        var evaluator = _compiler.Compile(rule).AsClrContext();
+        var evaluator = _compiler.Compile(rule).AsClrEvaluator();
         _evalContext = EvaluatorContextBuilder
             .Default
             .AsClrEvaluatorBuilder()
@@ -51,7 +51,7 @@ public class Should_can_execute_on_clr_context
 
     void WhenIEvaluateExpression(string trueExpression)
     {
-        var result = _compiler.CompileExpression(trueExpression).AsClrContext().Evaluate(_evalContext!)?.Value;
+        var result = _compiler.CompileExpression(trueExpression).AsClrEvaluator().Evaluate(_evalContext!)?.Value;
         _result = (bool?)result;
     }
 

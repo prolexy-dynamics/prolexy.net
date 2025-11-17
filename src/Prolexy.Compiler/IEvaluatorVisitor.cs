@@ -38,3 +38,17 @@ public record ClrEvaluatorResult(ClrEvaluatorContext Context, object Value) : IE
         init => Context = (ClrEvaluatorContext)value;
     }
 }
+public record SchemaCollectorResult(ClrEvaluatorContext Context, Dictionary<string, object> Fields) : IEvaluatorResult
+{
+    IEvaluatorContext IEvaluatorResult.Context
+    {
+        get => Context;
+        init => Context = (ClrEvaluatorContext)value;
+    }
+
+    public object Value
+    {
+        get => Fields;
+        init => Fields = (Dictionary<string, object>)value;
+    }
+}

@@ -13,7 +13,7 @@ public class Should_can_evaluate_expression_on_Clr_context
     void GivenICompileInput(string expression)
     {
         var compiler = new Implementations.Compiler();
-        _evaluator = compiler.CompileExpression(expression).AsClrContext();
+        _evaluator = compiler.CompileExpression(expression).AsClrEvaluator();
     }
 
     void WhenEvaluateCompiledCode(object context)

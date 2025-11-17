@@ -14,8 +14,9 @@ public interface ICompiler
 
 public interface ICompiledSource
 {
-    IRuleEvaluator<EvaluatorContext, EvaluatorResult> AsJsonContext();
-    IRuleEvaluator<ClrEvaluatorContext, ClrEvaluatorResult> AsClrContext();
+    IRuleEvaluator<EvaluatorContext, EvaluatorResult> AsJsonEvaluator();
+    IRuleEvaluator<ClrEvaluatorContext, ClrEvaluatorResult> AsClrEvaluator();
+    IRuleEvaluator<ClrEvaluatorContext, SchemaCollectorResult> AsFieldCollectorEvaluator();
     IRuleEvaluator<ExpressionTypeDetectorContext, TypeDetectorResult> AsExpressionClrReturnTypeEvaluator();
 }
 
@@ -28,13 +29,18 @@ class CompiledSource : ICompiledSource
         _ast = ast;
     }
 
-    public IRuleEvaluator<EvaluatorContext, EvaluatorResult> AsJsonContext()
+    public IRuleEvaluator<EvaluatorContext, EvaluatorResult> AsJsonEvaluator()
     {
         return new RuleEvaluator<EvaluatorContext, EvaluatorResult>(_ast, new EvaluatorVisitor());
     }
-    public IRuleEvaluator<ClrEvaluatorContext, ClrEvaluatorResult> AsClrContext()
+    public IRuleEvaluator<ClrEvaluatorContext, ClrEvaluatorResult> AsClrEvaluator()
     {
         return new RuleEvaluator<ClrEvaluatorContext, ClrEvaluatorResult>(_ast, new ClrEvaluatorVisitor());
+    }
+
+    public IRuleEvaluator<ClrEvaluatorContext, SchemaCollectorResult> AsFieldCollectorEvaluator()
+    {
+        return new RuleEvaluator<ClrEvaluatorContext, SchemaCollectorResult>(_ast, new SchemaCollectorVisitor());
     }
 
     public IRuleEvaluator<ExpressionTypeDetectorContext, TypeDetectorResult> AsExpressionClrReturnTypeEvaluator()
