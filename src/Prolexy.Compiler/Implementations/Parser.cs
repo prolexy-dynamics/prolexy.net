@@ -9,6 +9,14 @@ public class Parser : IParser
     private int _index;
     private readonly Stack<Span> _spans = new();
 
+    public Parser()
+    {
+    }
+    private Parser(Token[] tokens)
+    {
+        _tokens = tokens;
+        _index = 0;
+    }
     public IAst Parse(string input)
     {
         var tokens = _lexer.Tokenize(input);
@@ -17,9 +25,7 @@ public class Parser : IParser
 
     public IAst Parse(Token[] tokens)
     {
-        _tokens = tokens;
-        _index = 0;
-        return ParseStatements();
+        return new Parser(tokens).ParseStatements();
     }
 
     public IAst ParseExpression(string input)
@@ -31,9 +37,7 @@ public class Parser : IParser
 
     public IAst ParseExpression(Token[] tokens)
     {
-        _tokens = tokens;
-        _index = 0;
-        return ParseExp();
+        return new Parser(tokens).ParseExp();
     }
 
     private Token Peek()

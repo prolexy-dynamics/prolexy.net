@@ -1,17 +1,11 @@
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Prolexy.Compiler.Ast;
 using Prolexy.Compiler.ExtensionMethods;
 using Prolexy.Compiler.Models;
 
-namespace Prolexy.Compiler.Implementations;
+namespace Prolexy.Compiler.Implementations.Visitors;
 
-public interface IEvaluatorVisitor<in T, out TR> : IAstVisitor<T, TR>, IEvaluatorVisitor
-    where T : IEvaluatorContext
-    where TR : IEvaluatorResult
-{
-}
 #pragma warning disable CS8600, CS8602, CS8605, CS8604
 public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEvaluatorResult>
 {
@@ -261,29 +255,5 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
     IEvaluatorResult IEvaluatorVisitor.Visit(IAst ast, IEvaluatorContext context)
     {
         return ast.Visit(this, (ClrEvaluatorContext)context);
-    }
-}
-
-public class MethodSelector
-{
-    private readonly object _objectContext;
-    private readonly string _methodName;
-
-    public MethodSelector(object objectContext, string methodName)
-    {
-        _objectContext = objectContext;
-        _methodName = methodName;
-    }
-
-    public MethodInfo? FindMethod(object[] args)
-    {
-        return _objectContext.GetType()
-            .GetMethods()
-            .SingleOrDefault(m =>
-                m.Name == _methodName &&
-                m.GetParameters().Length == args.Length &&
-                m.GetParameters().Select((p, idx) =>
-                        p.ParameterType.IsInstanceOfType(args[idx]))
-                    .All(cond => cond));
     }
 }

@@ -34,13 +34,3 @@ public class Should_can_evaluate_expression_on_Clr_context
             Convert.ChangeType(_result, expected.GetType()).Should().Be(expected);
     }
 }
-
-public class Person
-{
-    public Person(string name)
-    {
-        Name = name;
-    }
-
-    public string Name { get; }
-}

@@ -176,24 +176,3 @@ public class SchemaGenerator
         throw new Exception("prolexy type not found exception.");
     }
 }
-
-public class DataSourceAttribute : Attribute
-{
-    public Type TargetType { get; }
-
-    public DataSourceAttribute(Type targetType)
-    {
-        TargetType = targetType;
-    }
-}
-
-public class ComplexTypeReferenceDataType : ITypeData
-{
-    public ComplexTypeReferenceDataType(string name)
-    {
-        Name = name;
-    }
-
-    public string Name { get; set; }
-    public TypeCategory Category => TypeCategory.ReferenceType;
-}

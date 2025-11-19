@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Immutable;
 using System.Reflection;
-using Newtonsoft.Json.Linq;
 using Prolexy.Compiler.ExtensionMethods;
 using Prolexy.Compiler.ExtensionMethods.DateTimeExtensions;
 
@@ -40,106 +39,4 @@ public record EvaluatorContextBuilder
 
     public JsonEvaluatorContextBuilder AsJsonEvaluatorBuilder() => new(_modules, _extensionMethods);
     public ClrEvaluatorContextBuilder AsClrEvaluatorBuilder() => new(_modules, _extensionMethods);
-}
-
-public record JsonEvaluatorContextBuilder
-{
-    private JObject _businessObject = null!;
-    private Schema _schema = null!;
-    private readonly ImmutableList<Module> _modules;
-    private readonly ImmutableList<Method> _extensionMethods;
-
-    internal JsonEvaluatorContextBuilder(ImmutableList<Module> modules, ImmutableList<Method> extensionMethods)
-    {
-        _modules = modules;
-        _extensionMethods = extensionMethods;
-    }
-
-    public JsonEvaluatorContextBuilder WithBusinessObject(JObject businessObject)
-    {
-        return this with { _businessObject = businessObject };
-    }
-
-    public JsonEvaluatorContextBuilder WithSchema(Schema schema)
-    {
-        return this with { _schema = schema };
-    }
-
-    public EvaluatorContext Build() => new(_businessObject, _schema, _modules, _extensionMethods);
-}
-
-public record ClrEvaluatorContextBuilder
-{
-    private object _businessObject = null!;
-    ImmutableList<ClrType> _clrTypes = ImmutableList<ClrType>.Empty;
-    private ImmutableList<Method> _extensionMethods;
-    private readonly ImmutableList<Module> _modules;
-
-    public ClrEvaluatorContextBuilder(ImmutableList<Module> modules, ImmutableList<Method> extensionMethods)
-    {
-        _modules = modules;
-        _extensionMethods = extensionMethods;
-    }
-
-    public ClrEvaluatorContextBuilder WithBusinessObject(object businessObject)
-    {
-        return this with { _businessObject = businessObject };
-    }
-
-    public ClrEvaluatorContextBuilder WithExtensionMethod(Method method)
-    {
-        if (_extensionMethods.Find(ext => ext == method) == null)
-            _extensionMethods = _extensionMethods.Add(method);
-        return this;
-    }
-
-    public ClrEvaluatorContextBuilder AddClrType<T>()
-    {
-        _clrTypes = _clrTypes.Add(new ClrType<T>());
-        return this;
-    }
-
-    public ExpressionTypeDetectorContextBuilder AsExpressionTypeDetectorContextBuilder() =>
-        new(_businessObject, _clrTypes, _extensionMethods, _modules);
-
-    public ClrEvaluatorContext Build() => new(
-        _businessObject,
-        _clrTypes,
-        _modules,
-        _extensionMethods);
-
-    public ClrSchemaGeneratorContextBuilder AsSchemaGeneratorContextBuilder()
-    {
-        return new(_businessObject as Type ?? _businessObject.GetType(), _clrTypes, _modules, _extensionMethods);
-    }
-    public ClrSchemaGeneratorContextBuilder AsSchemaGeneratorContextBuilder<T>()
-    {
-        return new(typeof(T), _clrTypes, _modules, _extensionMethods);
-    }
-}
-
-public class ClrSchemaGeneratorContextBuilder
-{
-    private readonly Type _businessObjectType;
-    private ImmutableList<ClrType> _clrTypes;
-    private ImmutableList<Module> _modules;
-    private ImmutableList<Method> _extensionMethods;
-
-    public ClrSchemaGeneratorContextBuilder(
-        Type businessObjectType,
-        ImmutableList<ClrType> clrTypes, 
-        ImmutableList<Module> modules,
-        ImmutableList<Method> extensionMethods)
-    {
-        _businessObjectType = businessObjectType;
-        _clrTypes = clrTypes;
-        _modules = modules;
-        _extensionMethods = extensionMethods;
-    }
-
-    public SchemaGeneratorEvaluatorContext Build() => new(
-        _businessObjectType,
-        _clrTypes,
-        _modules,
-        _extensionMethods);
 }

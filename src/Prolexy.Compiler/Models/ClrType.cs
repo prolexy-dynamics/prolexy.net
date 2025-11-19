@@ -1,0 +1,31 @@
+using Prolexy.Compiler.SchemaGenerators;
+
+namespace Prolexy.Compiler.Models;
+
+public class ClrType : IType
+{
+    private readonly Type _type;
+
+    public ClrType(Type type)
+    {
+        _type = type;
+    }
+
+    public string Name => _type.Name;
+    public Type Type => _type;
+    public IType? GetPropertyType(string name)
+    {
+        var prop = _type.GetProperty(name);
+        return prop != null ? new ClrType(prop.PropertyType) : null;
+    }
+
+    public ITypeData GetTypeData(SchemaGenerator generator)
+    {
+        return new SchemaGenerator().FromClrType(_type);
+    }
+
+    public Type? ToClrType()
+    {
+        return _type;
+    }
+}

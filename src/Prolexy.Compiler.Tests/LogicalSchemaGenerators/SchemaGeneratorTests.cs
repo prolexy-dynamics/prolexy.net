@@ -5,7 +5,7 @@ using Prolexy.Compiler.Models;
 using Prolexy.Compiler.SchemaGenerators;
 using Tiba.Trading.Domain.Contracts.Models.TradeOrders.Events;
 
-namespace Prolexy.Compiler.Tests.SchemaGenerators;
+namespace Prolexy.Compiler.Tests.LogicalSchemaGenerators;
 
 public class SchemaGeneratorTests
 {

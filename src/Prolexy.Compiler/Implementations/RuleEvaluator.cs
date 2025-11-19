@@ -4,7 +4,7 @@ using Prolexy.Compiler.Models;
 
 namespace Prolexy.Compiler.Implementations;
 
-class RuleEvaluator<TC, TR> : IRuleEvaluator<TC, TR>  where TC : IEvaluatorContext where TR : IEvaluatorResult
+class RuleEvaluator<TC, TR> : IRuleEvaluator<TC, TR>  where TC : IEvaluatorContext
 {
     private readonly IAst _ast;
     private readonly IEvaluatorVisitor _visitor;

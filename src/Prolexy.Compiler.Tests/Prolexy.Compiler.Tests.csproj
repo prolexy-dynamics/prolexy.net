@@ -27,9 +27,7 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
-
     <ItemGroup>
-      <ProjectReference Include="..\Prolexy.Compiler\Prolexy.Compiler.csproj" />
+        <ProjectReference Include="..\Prolexy.Compiler\Prolexy.Compiler.csproj" />
     </ItemGroup>
-
 </Project>

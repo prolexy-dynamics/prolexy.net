@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Prolexy.Compiler.Ast;
 using Prolexy.Compiler.ExtensionMethods;
+using Prolexy.Compiler.Implementations.Visitors;
 using Prolexy.Compiler.Models;
 using AnonymousMethod = Prolexy.Compiler.Ast.AnonymousMethod;
 

@@ -1,4 +1,4 @@
-namespace Prolexy.Compiler.Tests.SchemaGenerators;
+namespace Prolexy.Compiler.Tests.LogicalSchemaGenerators;
 
 public class TypeComposedFromSimpleType
 {
