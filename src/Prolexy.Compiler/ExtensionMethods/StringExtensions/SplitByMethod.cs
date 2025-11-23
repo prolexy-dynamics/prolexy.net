@@ -26,3 +26,25 @@ public record SplitByMethod() : StringExtensionMethod("SplitBy",
         return result;
     }
 }
+public record SubstringMethod() : StringExtensionMethod("Substring",
+    new Parameter[]
+    {
+        new("text", PrimitiveType.String),
+        new("from", PrimitiveType.Number),
+        new("len", PrimitiveType.Number)
+    },
+    new EnumerableType(PrimitiveType.String))
+{
+    public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
+        object methodContext,
+        IEnumerable<IAst> args)
+    {
+        var parameters = args.ToArray();
+        if (methodContext is not String text)
+            throw new ArgumentException("Substring method can execute on string types.");
+        var from = Convert.ToInt32( visitor.Visit(parameters[0], context).Value);
+        var len = Convert.ToInt32(visitor.Visit(parameters[1], context).Value);
+        object? result = text.Substring(from, len);
+        return result;
+    }
+}
