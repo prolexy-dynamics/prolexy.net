@@ -234,9 +234,34 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
         var args = instantiation.Arguments.Select((arg, idx) => arg.Visit(this, context).Value).ToArray();
 
         var constructorInfo = typeToInstantiate.Type.GetConstructors()
-            .SingleOrDefault(ctor => ctor.GetParameters().Length == instantiation.Arguments.Count &&
-                                     args.Select((a, i) => ctor.GetParameters()[i].ParameterType.IsInstanceOfType(a))
-                                         .All(a => a));
+            .SingleOrDefault(ctor =>
+            {
+                var parameters = ctor.GetParameters();
+
+                if (parameters.Length != args.Length)
+                    return false;
+
+                for (int i = 0; i < args.Length; i++)
+                {
+                    var targetType = parameters[i].ParameterType;
+                    var arg = args[i];
+
+                    if (arg == null)
+                        return !targetType.IsValueType || Nullable.GetUnderlyingType(targetType) != null;
+
+                    // آیا arg قابل تبدیل به targetType است؟
+                    try
+                    {
+                        _ = Convert.ChangeType(arg, targetType);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
         constructorInfo ??= typeToInstantiate.Type.GetConstructors()
             .FirstOrDefault(ctor => ctor.GetParameters().Length == instantiation.Arguments.Count &&
                                     args.Select((a, i) =>

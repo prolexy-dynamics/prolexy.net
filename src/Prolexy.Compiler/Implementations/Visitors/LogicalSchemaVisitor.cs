@@ -22,8 +22,8 @@ public class LogicalSchemaVisitor : IEvaluatorVisitor<ClrEvaluatorContext, Logic
     public LogicalSchemaNode VisitStatements(Statement statement, ClrEvaluatorContext context)
     {
         var result = LogicalSchemaNode.Object();
-        return statement.Statements.Aggregate(result, 
-            (current, st) => 
+        return statement.Statements.Aggregate(result,
+            (current, st) =>
                 current.MergeWith(st.Visit(this, context)));
     }
 
@@ -32,7 +32,7 @@ public class LogicalSchemaVisitor : IEvaluatorVisitor<ClrEvaluatorContext, Logic
 
     public LogicalSchemaNode VisitAssignment(Assignment assignment, ClrEvaluatorContext context)
         => assignment.Left.Visit(this, context)
-            .MergeWith( assignment.Right.Visit(this, context));
+            .MergeWith(assignment.Right.Visit(this, context));
 
     public LogicalSchemaNode VisitPriority(Priority priority, ClrEvaluatorContext context)
         => priority.InnerAst.Visit(this, context);
@@ -74,6 +74,8 @@ public class LogicalSchemaVisitor : IEvaluatorVisitor<ClrEvaluatorContext, Logic
 
     public LogicalSchemaNode VisitAccessMember(AccessMember accessMember, ClrEvaluatorContext context)
     {
+        if (!IsInputPath(accessMember, context))
+            return accessMember.Left.Visit(this, context);
         var name = accessMember.Token.Value;
 
         // Case 1: x.Quantity
@@ -106,6 +108,22 @@ public class LogicalSchemaVisitor : IEvaluatorVisitor<ClrEvaluatorContext, Logic
         var path = ExtractPath(accessMember);
         return BuildNested(path, leaf);
     }
+    private bool IsInputPath(IAst node, ClrEvaluatorContext context)
+    {
+        switch (node)
+        {
+            case ImplicitAccessMember im:
+                // Only context-based implicit members are inputs
+                return context.BusinessObject.GetType()
+                    .GetProperty(im.Token.Value) != null || _lambdaParameters.Contains(im.Token.Value);
+
+            case AccessMember am:
+                return IsInputPath(am.Left, context);
+
+            default:
+                return false;
+        }
+    }
 
     // -----------------------------------------
     //    MethodCall (Exists, etc.)
@@ -114,8 +132,10 @@ public class LogicalSchemaVisitor : IEvaluatorVisitor<ClrEvaluatorContext, Logic
     public LogicalSchemaNode VisitMethodCall(Call call, ClrEvaluatorContext context)
     {
         var leftAccess = call.MethodSelector as AccessMember;
-        var leftType = GetContextType(leftAccess.Left, context.BusinessObject);
-
+        //var mt = context.ExtensionMethods.SingleOrDefault(a => a.Name == call.MethodSelector.Token.Value);
+        var leftType = leftAccess is not null
+            ? GetContextType(leftAccess.Left, context.BusinessObject)
+            : null;
         if (call.MethodSelector.Token.Value == "Exists" ||
             call.MethodSelector.Token.Value == "Count" ||
             call.MethodSelector.Token.Value == "Sum" ||
@@ -150,8 +170,12 @@ public class LogicalSchemaVisitor : IEvaluatorVisitor<ClrEvaluatorContext, Logic
             return Wrap(arrayName, LogicalSchemaNode.Array(inner));
         }
 
+
+        ;
         // Default
-        var r = call.MethodSelector.Visit(this, context);
+        var r = leftAccess is not null
+            ? leftAccess.Left.Visit(this, context)
+            : new LogicalSchemaNode();
 
         return call.Arguments.Aggregate(r,
             (current, arg) =>
@@ -228,7 +252,7 @@ public class LogicalSchemaVisitor : IEvaluatorVisitor<ClrEvaluatorContext, Logic
         if (t == typeof(bool)) return LogicalSchemaNode.Primitive("boolean");
         if (t == typeof(int) || t == typeof(decimal) || t == typeof(double))
             return LogicalSchemaNode.Primitive("number");
-        if (t == typeof(DateTime)) return LogicalSchemaNode.Primitive("date-time");
+        if (t == typeof(DateTime)) return LogicalSchemaNode.Primitive("datetime");
         if (t == typeof(Newtonsoft.Json.Linq.JObject))
             return LogicalSchemaNode.Object();
 

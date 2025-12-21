@@ -16,6 +16,7 @@ public class LogicalSchemaVisitorTests
         public LineItem[] LineItems { get; set; }
         public bool accepted { get; set; }
         public JObject AdditionalData { get; set; }
+        public JObject Data { get; set; }
         public JObject brother { get; set; }
     }
 
@@ -65,6 +66,20 @@ public class LogicalSchemaVisitorTests
         bro.Properties.Should().ContainKey("birthDay");
 
         bro.Properties["birthDay"].PrimitiveType.Should().Be("date-time");
+    }
+
+    [Fact]
+    public void IR_should_collect_parameter_of_method_call()
+    {
+        var ir = ParseAndVisit("Iff(Data.glCode.normalBalance() is 'Debit', 'Credit', 'Debit').field1.field2");
+
+        ir.Properties.Should().ContainKey("Data");
+        var bro = ir.Properties["Data"];
+
+        bro.Kind.Should().Be(LogicalSchemaNode.NodeKind.Object);
+        bro.Properties.Should().ContainKey("glCode");
+
+        bro.Properties["glCode"].PrimitiveType.Should().Be("string");
     }
 
     // ------------------------------------------------------------------

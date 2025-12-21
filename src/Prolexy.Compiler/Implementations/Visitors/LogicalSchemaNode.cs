@@ -125,7 +125,7 @@ public class LogicalSchemaNode
                 new LogicalSchemaNode
                 {
                     Kind = NodeKind.Object,
-                    Properties = n.Properties.ToDictionary(k => k.Key, v => Clone(v.Value))
+                    Properties = (n.Properties ?? []).ToDictionary(k => k.Key, v => Clone(v.Value))
                 },
 
             _ => throw new Exception("Invalid SchemaNode")

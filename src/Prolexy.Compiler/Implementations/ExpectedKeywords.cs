@@ -1,8 +1,10 @@
+using Prolexy.Compiler.Ast;
+
 namespace Prolexy.Compiler.Implementations;
 
-internal class ExpectedKeywords : Exception
+public class ExpectedKeywords : ParserException
 {
-    public ExpectedKeywords(string[] keywords, int index)
+    public ExpectedKeywords(TextSpan span,string[] keywords, int index):base(span, "Expected keywords")
     {
     }
 }

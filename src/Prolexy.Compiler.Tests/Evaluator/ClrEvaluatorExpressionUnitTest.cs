@@ -23,6 +23,7 @@ public class ClrEvaluatorExpressionUnitTest
                 { "false", null, false },
                 { "2020/10/12", null, new DateTime(2020, 10, 12) },
                 { "${Value:Text:string}", null, "Value" },
+                { "${Value:Text:enum}", null, "Value" },
                 { "${25:Text:number}", null, 25 },
             })
             .BDDfy<JsonEvaluatorExpressionUnitTest>();
@@ -35,6 +36,7 @@ public class ClrEvaluatorExpressionUnitTest
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
                 { "name", new { name = "yasser" }, "yasser" },
+                { "Name.Substring(0, 1)", new { Name = "yasser" }, "y" },
                 { "age", new { age = 10 }, 10 },
                 { "nothing", new { nothing = (int?)null }, null },
                 { "accepted", new { accepted = true }, true },

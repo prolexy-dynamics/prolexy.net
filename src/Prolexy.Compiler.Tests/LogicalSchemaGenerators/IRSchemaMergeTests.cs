@@ -63,8 +63,8 @@ public class IRSchemaMergeTests
 
         var item = merged.Properties["LineItems"].Item;
 
-        item.Properties.Should().ContainKey("Product");
         item.Properties.Should().ContainKey("Quantity");
+        item.Properties.Should().ContainKey("Product");
 
         item.Properties["Product"].PrimitiveType.Should().Be("string");
         item.Properties["Quantity"].PrimitiveType.Should().Be("number");

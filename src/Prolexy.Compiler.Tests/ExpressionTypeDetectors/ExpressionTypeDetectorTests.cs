@@ -44,7 +44,7 @@ public class ExpressionTypeDetectorTests
         new Should_can_evaluate_expression_return_type()
             .WithExamples(new ExampleTable("expression", "context", "expectedType")
             {
-                { "name", context, typeof(string) },
+                { "name1.Test", context, typeof(string) },
                 { "married", context, typeof(bool) },
                 { "age", context, typeof(int) },
                 { "birthDay", context, typeof(DateTime) },

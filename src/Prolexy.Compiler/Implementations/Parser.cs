@@ -32,7 +32,10 @@ public class Parser : IParser
     {
         _tokens = _lexer.Tokenize(input);
         _index = 0;
-        return ParseExp();
+        var result = ParseExp();
+        if (Peek().TokenType == Token.Eof.TokenType) return result;
+        StartSpan();
+        throw new ExpectedTokenTypes(Peek().Span, [], []);
     }
 
     public IAst ParseExpression(Token[] tokens)
@@ -55,6 +58,10 @@ public class Parser : IParser
         _spans.Push(new Span(_index, _index));
     }
 
+    Span CurrentSpan()
+    {
+        return _spans.Peek();
+    }
     Span CloseSpan()
     {
         var span = _spans.Pop()!;
@@ -88,7 +95,7 @@ public class Parser : IParser
         StartSpan();
         var head = Peek();
         if (head.TokenType != TokenType.Keyword)
-            throw new ExpectedKeywords(new[] { Keywords.Set, Keywords.Call, Keywords.If }, _index);
+            throw new ExpectedKeywords(head.Span, new[] { Keywords.Set, Keywords.Call, Keywords.If }, _index);
         IAst result;
         switch (head.Value)
         {
@@ -104,7 +111,7 @@ public class Parser : IParser
                 result = ParseIf();
                 break;
             default:
-                throw new ExpectedKeywords(new[] { Keywords.Set, Keywords.Call, Keywords.If }, _index);
+                throw new ExpectedKeywords(head.Span, new[] { Keywords.Set, Keywords.Call, Keywords.If }, _index);
         }
 
         return result;
@@ -146,7 +153,7 @@ public class Parser : IParser
         } while (ConsumeOptional(Keywords.AndThen, TokenType.Keyword) != null);
 
         if (ConsumeOptional(Keywords.End, TokenType.Keyword) == null)
-            throw new ExpectedKeywords(new[] { Keywords.End }, _index);
+            throw new ExpectedKeywords(Peek().Span, new[] { Keywords.End }, _index);
         return new Statement(result, CloseSpan());
     }
 
@@ -165,7 +172,7 @@ public class Parser : IParser
 
     private void ExpectedKeywords(string[] keywords)
     {
-        throw new ExpectedKeywords(keywords, _index);
+        throw new ExpectedKeywords(Peek().Span, keywords, _index);
     }
 
     private IAst ParseExp()
@@ -401,7 +408,7 @@ public class Parser : IParser
 
     private Exception ExpectedTokenTypes(TokenType[] p0, string[]? strings = null)
     {
-        return new ExpectedTokenTypes(p0, strings);
+        return new ExpectedTokenTypes(Peek().Span, p0, strings);
     }
 
     private IAst ParseCallStatement()

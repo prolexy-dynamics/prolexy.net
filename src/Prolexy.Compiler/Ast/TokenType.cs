@@ -6,5 +6,6 @@ public enum TokenType
     Operation = 2,
     Const = 3,
     Identifier = 4,
-    Eof = 16
+    Invalid = 8,
+    Eof = 16,
 }
