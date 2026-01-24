@@ -29,6 +29,7 @@ public class ExpressionTypeDetectorTests
         new Should_can_evaluate_expression_return_type()
             .WithExamples(new ExampleTable("expression", "context", "expectedType")
             {
+                { "GetPersonalGlAccounts(BranchCode)", new { }, typeof(string) },
                 { "('yaser' + ' ') + 'abbasi'", new { }, typeof(string) },
                 { "(true)", new { }, typeof(bool) },
                 { "(10)", new { }, typeof(decimal) },
@@ -44,7 +45,7 @@ public class ExpressionTypeDetectorTests
         new Should_can_evaluate_expression_return_type()
             .WithExamples(new ExampleTable("expression", "context", "expectedType")
             {
-                { "name1.Test", context, typeof(string) },
+                { "name", context, typeof(string) },
                 { "married", context, typeof(bool) },
                 { "age", context, typeof(int) },
                 { "birthDay", context, typeof(DateTime) },

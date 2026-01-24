@@ -72,6 +72,6 @@ public class TranslateAstVisitor : IAstVisitor<FormatterContext, string>
     public string VisitInstantiation(Instantiation instantiation, FormatterContext context)
     {
         var args = string.Join(", ", instantiation.Arguments.Select(a => a.Visit(this, context)?.ToString()));
-        return $"new {instantiation.Typename}({args})";
+        return $"new  {instantiation.Typename.Value}({args})";
     }
-}
+}   

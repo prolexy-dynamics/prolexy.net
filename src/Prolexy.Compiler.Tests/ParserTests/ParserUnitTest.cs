@@ -12,6 +12,7 @@ public class ParserUnitTest
         new Should_can_parse_expression()
             .WithExamples(new ExampleTable("input", "expected syntax")
             {
+                { "new Currency(Balance.Currency).Code2", "new Currency(Balance.Currency).Code2" },
                 { "'yaser'", "\"yaser\"" },
                 { "10", "10" },
                 { "null", "null" },
