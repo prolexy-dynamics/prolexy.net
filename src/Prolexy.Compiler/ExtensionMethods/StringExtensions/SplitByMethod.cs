@@ -33,7 +33,7 @@ public record SubstringMethod() : StringExtensionMethod("Substring",
         new("from", PrimitiveType.Number),
         new("len", PrimitiveType.Number)
     },
-    new EnumerableType(PrimitiveType.String))
+    PrimitiveType.String)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext,
