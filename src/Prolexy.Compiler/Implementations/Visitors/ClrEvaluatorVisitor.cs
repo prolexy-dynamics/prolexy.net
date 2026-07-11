@@ -24,6 +24,7 @@ public class ClrEvaluatorVisitor : IEvaluatorVisitor<ClrEvaluatorContext, ClrEva
         switch (binary.Operation)
         {
             case Operations.Eq:
+            case Operations.DateEqual:
             case Operations.Is:
                 return EvaluatorResult(left is IComparable ? comparable.CompareTo(right) == 0 : left == right);
             case Operations.Neq:

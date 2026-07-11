@@ -25,61 +25,37 @@ public class EvaluatorVisitor : IEvaluatorVisitor<EvaluatorContext, EvaluatorRes
         var left = (JValue)binary.Left.Visit(this, context).Value;
         var right = (JValue)binary.Right.Visit(this, context).Value;
 
-        switch (binary.Operation)
+        return binary.Operation switch
         {
-            case Operations.Is: return EvaluatorResult(Comparer<JValue>.Default.Compare(left, right) == 0);
-            case Operations.IsNot: return EvaluatorResult(Comparer<JValue>.Default.Compare(left, right) != 0);
-            case Operations.After: return EvaluatorResult((DateTime)left > (DateTime)right);
-            case Operations.AfterOrEq: return EvaluatorResult((DateTime)left >= (DateTime)right);
-            case Operations.Before: return EvaluatorResult((DateTime)left < (DateTime)right);
-            case Operations.BeforeOrEq: return EvaluatorResult((DateTime)left <= (DateTime)right);
-            case Operations.Contains:
-                return EvaluatorResult(((string)left).Contains((string)right));
-            case Operations.NotContains:
-                return EvaluatorResult(!((string)left).Contains((string)right));
-            case Operations.StartsWith:
-                return EvaluatorResult(((string)left).StartsWith((string)right));
-            case Operations.NotStartsWith:
-                return EvaluatorResult(!((string)left).StartsWith((string)right));
-            case Operations.EndsWith:
-                return EvaluatorResult(((string)left).EndsWith((string)right));
-            case Operations.NotEndsWith:
-                return EvaluatorResult(!((string)left).EndsWith((string)right));
-
-
-            case Operations.Eq:
-                return EvaluatorResult((decimal?)left == (decimal?)right);
-            case Operations.Neq:
-                return EvaluatorResult((decimal?)left != (decimal?)right);
-            case Operations.Lt:
-                return EvaluatorResult((decimal?)left < (decimal?)right);
-            case Operations.Lte:
-                return EvaluatorResult((decimal?)left <= (decimal?)right);
-            case Operations.Gt:
-                return EvaluatorResult((decimal?)left > (decimal?)right);
-            case Operations.Gte:
-                return EvaluatorResult((decimal?)left >= (decimal?)right);
-
-            case Operations.Plus:
-                return EvaluatorResult((dynamic)left + (dynamic)right);
-            case Operations.Minus:
-                return EvaluatorResult((decimal)left - (decimal)right);
-            case Operations.Multiply:
-                return EvaluatorResult((decimal)left * (decimal)right);
-            case Operations.Devide:
-                return EvaluatorResult((decimal)left / (decimal)right);
-            case Operations.Power:
-                return EvaluatorResult(Math.Pow((float)left, (float)right));
-            case Operations.Module:
-                return EvaluatorResult((decimal)left % (decimal)right);
-
-            case Operations.Or:
-                return EvaluatorResult((bool)left || (bool)right);
-            case Operations.And:
-                return EvaluatorResult((bool)left && (bool)right);
-        }
-
-        throw new NotImplementedException();
+            Operations.Is or  Operations.DateEqual =>
+                EvaluatorResult(Comparer<JValue>.Default.Compare(left, right) == 0),
+            Operations.IsNot => EvaluatorResult(Comparer<JValue>.Default.Compare(left, right) != 0),
+            Operations.After => EvaluatorResult((DateTime)left > (DateTime)right),
+            Operations.AfterOrEq => EvaluatorResult((DateTime)left >= (DateTime)right),
+            Operations.Before => EvaluatorResult((DateTime)left < (DateTime)right),
+            Operations.BeforeOrEq => EvaluatorResult((DateTime)left <= (DateTime)right),
+            Operations.Contains => EvaluatorResult(((string)left).Contains((string)right)),
+            Operations.NotContains => EvaluatorResult(!((string)left).Contains((string)right)),
+            Operations.StartsWith => EvaluatorResult(((string)left).StartsWith((string)right)),
+            Operations.NotStartsWith => EvaluatorResult(!((string)left).StartsWith((string)right)),
+            Operations.EndsWith => EvaluatorResult(((string)left).EndsWith((string)right)),
+            Operations.NotEndsWith => EvaluatorResult(!((string)left).EndsWith((string)right)),
+            Operations.Eq => EvaluatorResult((decimal?)left == (decimal?)right),
+            Operations.Neq => EvaluatorResult((decimal?)left != (decimal?)right),
+            Operations.Lt => EvaluatorResult((decimal?)left < (decimal?)right),
+            Operations.Lte => EvaluatorResult((decimal?)left <= (decimal?)right),
+            Operations.Gt => EvaluatorResult((decimal?)left > (decimal?)right),
+            Operations.Gte => EvaluatorResult((decimal?)left >= (decimal?)right),
+            Operations.Plus => EvaluatorResult((dynamic)left + (dynamic)right),
+            Operations.Minus => EvaluatorResult((decimal)left - (decimal)right),
+            Operations.Multiply => EvaluatorResult((decimal)left * (decimal)right),
+            Operations.Devide => EvaluatorResult((decimal)left / (decimal)right),
+            Operations.Power => EvaluatorResult(Math.Pow((float)left, (float)right)),
+            Operations.Module => EvaluatorResult((decimal)left % (decimal)right),
+            Operations.Or => EvaluatorResult((bool)left || (bool)right),
+            Operations.And => EvaluatorResult((bool)left && (bool)right),
+            _ => throw new NotImplementedException()
+        };
     }
 
     public EvaluatorResult VisitAssignment(Assignment assignment, EvaluatorContext context)

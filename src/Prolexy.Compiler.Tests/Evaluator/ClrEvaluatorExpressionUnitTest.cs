@@ -207,6 +207,7 @@ public class ClrEvaluatorExpressionUnitTest
     [Fact]
     public void Should_can_evaluate_extension_method()
     {
+        var tomorrow = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
         new Should_can_evaluate_expression_on_Clr_context()
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
@@ -219,6 +220,7 @@ public class ClrEvaluatorExpressionUnitTest
                     DateTime.Parse("2020-10-13")
                 },
                 { $"Now() after or equal to {DateTime.Now:yyyy'/'MM'/'dd}", new MyBusinessObject(), true },
+                { $"Tomorrow() equal to {tomorrow:yyyy'/'MM'/'dd}", new MyBusinessObject(), true },
                 {
                     "Cities.Exists(def x => x.name is 'Tehran')", new { Cities = new[] { new { name = "Tehran" } } },
                     true

@@ -10,6 +10,7 @@ public static class Operations
     public const string NotContains = "not contains";
     public const string Empty = "empty";
     public const string NotEmpty = "notempty";
+    public const string DateEqual = "equal to";
     public const string After = "after";
     public const string AfterOrEq = "after or equal to";
     public const string Before = "before";
@@ -53,7 +54,7 @@ public static class Operations
     };
 
     public static readonly string[] DateOperations = new[]
-        { AfterOrEq, After, BeforeOrEq, Before };
+        { DateEqual, AfterOrEq, After, BeforeOrEq, Before };
 
     public static readonly string[] Binaryoperations =
         DateOperations.Union(LogicalOperations)
