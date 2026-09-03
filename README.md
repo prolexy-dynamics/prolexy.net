@@ -1,5 +1,3 @@
-# prolexy.net
-dotnet backend library for prolexy scripting language
 # Prolexy.NET
 
 **Prolexy.NET** is the .NET compiler and runtime for the **Prolexy scripting language**.
