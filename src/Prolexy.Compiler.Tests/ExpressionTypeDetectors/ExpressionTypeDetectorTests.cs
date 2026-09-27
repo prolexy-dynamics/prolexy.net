@@ -33,6 +33,7 @@ public class ExpressionTypeDetectorTests
                 { "('yaser' + ' ') + 'abbasi'", new { }, typeof(string) },
                 { "(true)", new { }, typeof(bool) },
                 { "(10)", new { }, typeof(decimal) },
+                { "obj.Date.Format('o')", new { obj =  JObject.FromObject(new { Date=DateTime.Parse("2026-09-14T05:46:02.2640335Z") }) }, typeof(string) },
                 { "(2020/10/12)", new { }, typeof(DateTime) },
             })
             .BDDfy<ExpressionTypeDetectorTests>();

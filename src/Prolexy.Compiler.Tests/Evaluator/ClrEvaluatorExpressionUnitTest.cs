@@ -214,6 +214,7 @@ public class ClrEvaluatorExpressionUnitTest
                 { "Eval('AdditionalData.brotherName')", new MyBusinessObject(), "Alex" },
                 { "Eval('AdditionalData.father.incomes.Sum(def x => x)')", new MyBusinessObject(), 30 },
                 { "'Code,Name'.SplitBy(',').Exists(def a => a is 'Code')", new { BranchCode = "12345" }, true },
+                { " obj.Date.ToUniversalTime().Format('o')",new {obj =  JObject.FromObject(new { Date=DateTime.Parse("2026-09-14T05:46:02.2640335Z") })}, $"2026-09-14T05:46:02.2640335Z"},
                 { "'18-' + BranchCode + '-' + Now().Format('yyyyMMdd')", new { BranchCode = "12345" }, $"18-12345-{DateTime.Now.ToString("yyyyMMdd", new CultureInfo("fa"))}"},
                 {
                     "OrderDate.AddDays(1)", new MyBusinessObject { OrderDate = new(2020, 10, 12) },

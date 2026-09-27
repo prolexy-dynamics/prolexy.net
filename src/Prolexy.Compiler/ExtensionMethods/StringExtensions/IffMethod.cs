@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using Prolexy.Compiler.Ast;
 using Prolexy.Compiler.Models;
 
@@ -19,9 +20,18 @@ public record IffMethod() : Method("Iff",
     {
         var parameters = args.ToArray();
         var condition = visitor.Visit(parameters[0], context).Value;
-        if (condition is not bool satisfied)
-            throw new ArgumentException("SplitBy accept string parameter.");
-        return satisfied ? visitor.Visit(parameters[1], context).Value : visitor.Visit(parameters[2], context).Value;
+
+        var satisfied = condition switch
+        {
+            bool value => value,
+            JValue { Type: JTokenType.Boolean } value => value.Value<bool>(),
+            null => false,
+            _ => throw new ArgumentException($"Condition should be true or false, but was: {condition?.GetType()}.")
+        };
+
+        return satisfied
+            ? visitor.Visit(parameters[1], context).Value
+            : visitor.Visit(parameters[2], context).Value;
     }
 
     public override bool Accept(object value, bool implicitAccessMethod)

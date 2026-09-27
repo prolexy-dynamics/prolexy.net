@@ -169,11 +169,14 @@ public class JsonEvaluatorExpressionUnitTest
         new Should_can_evaluate_expression_on_Json_context()
             .WithExamples(new ExampleTable("expression", "context", "expected")
             {
+                { "Iff(Data.refund is 'true', true, false)", "{Data: {refund: 'false'}}", false },
                 { "OrderDate.AddDays(1)", "{OrderDate: '2020-10-12T00:00:00z'}", DateTime.Parse("2020-10-13") },
                 { $"Now() after or equal to {DateTime.Now:yyyy'/'MM'/'dd}", "{}", true },
-                // { "personCities.GroupBy(def x => x.city, def x => x.person).Tehran.Count(def x => true)", 
+                // {
+                //     "personCities.GroupBy(def x => x.city, def x => x.person).Tehran.Count(def x => true)", 
                 //     "{personCities: [{city: 'Tehran', person: 'ali'}]}",
-                //     1 },
+                //     1
+                // },
                 { "Cities.Exists(def x => x.name is 'Tehran')", "{Cities: [{name: 'Tehran'}]}", true },
                 { "Cities.Exists(def x => x.name is 'Shiraz')", "{Cities: [{name: 'Tehran'}]}", false },
                 { "Cities.Count(def x => x.name is 'Tehran')", "{Cities: [{name: 'Tehran'}]}", 1 },
@@ -183,13 +186,13 @@ public class JsonEvaluatorExpressionUnitTest
                 { "Grades.Sum(def x => x)", "{Grades: [0, 1, 2, 3, 4, 5]}", 15 },
                 { "Grades.Avg(def x => x)", "{Grades: [0, 1, 2, 3, 4, 5]}", 15 / 6 },
                 {
-                    "CouponKey contains '2001' and LineItems.Exists(def x => x.Product is 'special product')", 
+                    "CouponKey contains '2001' and LineItems.Exists(def x => x.Product is 'special product')",
                     @"{
-	                    ""CouponKey"": ""2001"",
-                        ""TotalOrderPrice"": 2000000,
-                        ""DiscountPercentage"": 0,
-                        ""LineItems"": [{ ""Product"": ""special product"",""Quantity"": 0,""Delivered"": 0  }]
-                     }",
+	                     ""CouponKey"": ""2001"",
+                         ""TotalOrderPrice"": 2000000,
+                         ""DiscountPercentage"": 0,
+                         ""LineItems"": [{ ""Product"": ""special product"",""Quantity"": 0,""Delivered"": 0  }]
+                      }",
                     true
                 }
             })

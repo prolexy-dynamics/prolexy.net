@@ -6,15 +6,21 @@ using Prolexy.Compiler.Models;
 namespace Prolexy.Compiler.ExtensionMethods.DateTimeExtensions;
 
 public record FormatDatetimeExtensions() : Method("Format", PrimitiveType.Datetime,
-    new[] { new Parameter("format", PrimitiveType.String) },
-    PrimitiveType.Boolean)
+    new[]
+    {
+        new Parameter("format", PrimitiveType.String),
+        new Parameter("culture", PrimitiveType.String)
+    },
+    PrimitiveType.String)
 {
     public override object Eval(IEvaluatorVisitor visitor, IEvaluatorContext context,
         object methodContext, IEnumerable<IAst> args)
     {
-        var format = visitor.Visit(args.First(), context).Value.ToString();
+        var enumerable = args as IAst[] ?? args.ToArray();
+        var format = visitor.Visit(enumerable.First(), context).Value.ToString();
         var datetime = Convert.ToDateTime(methodContext);
-        return datetime.ToLocalTime().ToString(format, CultureInfo.GetCultureInfo("fa-Ir"));
+        var culture = CultureInfo.GetCultureInfo(enumerable.Count() > 1 ? visitor.Visit(enumerable.ElementAt(1), context).Value.ToString() : "fa-Ir");
+        return datetime.ToString(format, culture);
     }
 
     public override bool Accept(object value, bool implicitAccessMethod)
